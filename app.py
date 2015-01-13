@@ -282,7 +282,7 @@ class ImagenetDetection(object):
                         for l in f.readlines()
                         ])
                 self.labels = labels_df.sort('synset_id')
-        def nms_detections(self,dets,overlap=0.3):
+        def nms_detections(self,dets,overlap=0.1):
             x1 = dets[:,3]
             y1 = dets[:,2]
             x2 = dets[:,5]
@@ -316,6 +316,7 @@ class ImagenetDetection(object):
             del(df['filename'])
             predictions_df = pd.DataFrame(np.vstack(df.prediction.values))
             del(df['prediction'])
+            midtime = time.time()
             max_val_each=predictions_df.max(1)
             max_ind_each=predictions_df.idxmax(1)
             max_each=pd.concat([max_val_each,max_ind_each],axis=1)
@@ -339,6 +340,7 @@ class ImagenetDetection(object):
             newimagefilename=newimagelist[0]+'Result.'+newimagelist[1]
             cv2.imwrite(newimagefilename,img)
             endtime=time.time()
+            print endtime - midtime
             logging.info("Processed {} windows in {:.3f} s.".format(len(detections),endtime-starttime))
             return (True,result,result,'%.3f' % (endtime - starttime),newimagefilename) 
 

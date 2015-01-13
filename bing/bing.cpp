@@ -100,7 +100,61 @@ inline Rect Vec4i2Rect(Vec4i &v){return Rect(Point(v[0] - 1, v[1] - 1), Point(v[
 
 
 namespace bp = boost::python;
-//using namespace std;
+
+class Boxes{
+public:
+	Boxes(){ 
+		value.clear();
+		xmin.clear();
+		xmax.clear();
+		ymin.clear();
+		ymax.clear();
+	}
+	void add(float v,int x1,int y1,int x2,int y2){
+		value.push_back(v);
+		xmin.push_back(x1);
+		ymin.push_back(y1);
+		xmax.push_back(x2);
+		ymax.push_back(y2);
+	}
+	vector<float>::iterator valueBegin(){
+		return value.begin();
+	}
+	vector<float>::iterator valueEnd(){
+		return value.end();
+	}
+	vector<int>::iterator xminBegin(){
+		return xmin.begin();
+	}
+	vector<int>::iterator xminEnd(){
+		return xmin.end();
+	}
+	vector<int>::iterator yminBegin(){
+		return ymin.begin();
+	}
+	vector<int>::iterator yminEnd(){
+		return ymin.end();
+	}
+	vector<int>::iterator xmaxBegin(){
+		return xmax.begin();
+	}
+	vector<int>::iterator xmaxEnd(){
+		return xmax.end();
+	}
+	vector<int>::iterator ymaxBegin(){
+		return ymax.begin();
+	}
+	vector<int>::iterator ymaxEnd(){
+		return ymax.end();	
+	}
+
+private:
+	vector<float> value;
+	vector<int> xmin;
+	vector<int> xmax;
+	vector<int> ymin;
+	vector<int> ymax;
+};
 
 class FilterTIG
 {
@@ -279,20 +333,27 @@ public:
 	   }
 	   return 1;
 	}
-	void getBoxesOfOneImage(string imagefilename,int numDetPerSize,string storefilename){
-		cout << imagefilename << endl ;
+	Boxes getBoxesOfOneImage(string imagefilename,int numDetPerSize,string storefilename){
+		//cout << imagefilename << endl ;
 		Mat img3u;
 		ValStructVec<float,Vec4i> boxes;
 		img3u = imread(_S(imagefilename));
 		vecI sz;
 		predictBBoxSI(img3u,boxes,sz,numDetPerSize,false);
 		predictBBoxSII(boxes,sz);
+		/*
 		FILE *f = fopen(_S(storefilename), "w");
 		fprintf(f, "%d\n", boxes.size());
 		for (size_t k = 0; k < boxes.size(); k++)
 			fprintf(f, "%g, %s\n", boxes(k), _S(strVec4i(boxes[k])));
 		fclose(f);
-		
+		*/
+		Boxes store_boxes;
+		for (size_t k = 0; k < boxes.size(); k++){
+			Vec4i box = boxes[k];
+			store_boxes.add(boxes(k),box[0],box[1],box[2],box[3]);
+		}
+		return store_boxes;	
 	}
 	void predictBBoxSI(CMat &img3u, ValStructVec<float, Vec4i> &valBoxes, vecI &sz, int NUM_WIN_PSZ, bool fast)
 	{
@@ -447,12 +508,21 @@ private:
 	inline string strVec4i(const Vec4i &v) const {return format("%d, %d, %d, %d", v[0], v[1], v[2], v[3]);}
 
 };
+
+
 BOOST_PYTHON_MODULE(bing){
 	bp::class_<Bing>("Bing",bp::init<float,int,int>())
 		.def("loadTrainModel",&Bing::loadTrainModel)
 		.def("getBoxesOfOneImage",&Bing::getBoxesOfOneImage)
 	;
-
+	bp::class_<Boxes>("Boxes")
+		.def("add",&Boxes::add)
+		.def("values",bp::range(&Boxes::valueBegin,&Boxes::valueEnd))
+		.def("xmins",bp::range(&Boxes::xminBegin,&Boxes::xminEnd))
+		.def("xmaxs",bp::range(&Boxes::xmaxBegin,&Boxes::xmaxEnd))
+		.def("ymins",bp::range(&Boxes::yminBegin,&Boxes::yminEnd))
+		.def("ymaxs",bp::range(&Boxes::ymaxBegin,&Boxes::ymaxEnd))
+	;
 }
 
 
