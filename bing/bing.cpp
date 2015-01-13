@@ -333,7 +333,7 @@ public:
 	   }
 	   return 1;
 	}
-	Boxes getBoxesOfOneImage(string imagefilename,int numDetPerSize,string storefilename){
+	Boxes getBoxesOfOneImage(string imagefilename,int numDetPerSize){
 		//cout << imagefilename << endl ;
 		Mat img3u;
 		ValStructVec<float,Vec4i> boxes;

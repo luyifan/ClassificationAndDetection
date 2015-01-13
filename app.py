@@ -17,6 +17,8 @@ import caffe
 import exifutil
 import skimage.io
 import cv2
+from bing import Bing
+from bing import Boxes
 REPO_DIRNAME = os.path.abspath(os.path.dirname(__file__) + '/../..')
 UPLOAD_FOLDER = '/tmp/caffe_demos_uploads'
 ALLOWED_IMAGE_EXTENSIONS = set(['png', 'bmp', 'jpg', 'jpe', 'jpeg', 'gif'])
@@ -248,17 +250,18 @@ class ImagenetDetection(object):
 				'{}/python/caffe/imagenet/ilsvrc_2012_mean.npy'.format(REPO_DIRNAME)),
 			'class_labels_file':(
 				'{}/data/ilsvrc12/det_synset_words.txt'.format(REPO_DIRNAME)),
-	}
+        }
 	for key , val in default_args.iteritems():
 		if not os.path.exists(val):
 			raise Exception("File for {} is missing. Should be at: {}".format(key, val))
-	default_args['gpu_mode'] = False
+	default_args['bing_model'] = '{}/examples/ClassificationAndDetection/bing/model/ObjNessB2W8MAXBGR'.format(REPO_DIRNAME)
+        default_args['gpu_mode'] = False
         default_args['raw_scale'] = 255
         default_args['image_dim'] = 227
         default_args['channel_swap'] ='2,1,0'
         default_args['context_pad'] = 16
 
-        def __init__(self,model_def_file, pretrained_model_file , mean_file , class_labels_file , gpu_mode , raw_scale ,
+        def __init__(self,model_def_file, pretrained_model_file , mean_file , class_labels_file , bing_model , gpu_mode , raw_scale ,
                 image_dim , channel_swap , context_pad , input_scale = None ):
 		logging.info('Loading net and associated files...')
                 mean , channel = None , None 
@@ -269,6 +272,8 @@ class ImagenetDetection(object):
 
                 self.net = caffe.Detector(model_def_file,pretrained_model_file,
                         gpu=gpu_mode,mean=mean,input_scale=input_scale,raw_scale=raw_scale,channel_swap=channel,context_pad=context_pad)
+                self.bing_search = Bing(2,8,2);
+                self.bing_search.loadTrainModel(bing_model)
                 if gpu_mode:
                     print 'GPU mode'
                 else:
@@ -288,10 +293,17 @@ class ImagenetDetection(object):
             x2 = dets[:,5]
             y2 = dets[:,4]
             ind = np.argsort(dets[:,0])
+            dets_len = len(ind)
+
+            if(dets_len <=5):
+                pick=ind[:].tolist()[::-1]
+                return dets[pick,:]
+            else:
+                pick=ind[-5:].tolist()[::-1]
             w = x2 - x1
             h = y2 - y1 
             area = (w*h).astype(float)
-            pick=[]
+            ind=ind[:-5]
             while len(ind)>0:
                 i=ind[-1]
                 pick.append(i)
@@ -307,8 +319,16 @@ class ImagenetDetection(object):
                 ind = ind[np.nonzero(o<=overlap)[0]]
             return dets[pick,:]
         def detect_image(self,imagefilename):
-            starttime = time.time()
-            detections = self.net.detect_selective_search([imagefilename])
+            starttime = time.time() 
+            boxes = self.bing_search.getBoxesOfOneImage(imagefilename,130)
+            ymins=[ s for s in boxes.ymins() ]
+            ymaxs=[ s for s in boxes.ymaxs() ]
+            xmins=[ s for s in boxes.xmins() ]
+            xmaxs=[ s for s in boxes.xmaxs() ]
+            bing_windows=pd.DataFrame({0:ymins,1:xmins,2:ymaxs,3:xmaxs}) 
+            logging.info("Processed bing get {} windows in {:.3f} s.".format(bing_windows.shape[0],time.time() - starttime))
+            detections = self.net.detect_windows([(imagefilename,bing_windows.values)])
+            #detections = self.net.detect_selective_search([imagefilename])
             df = pd.DataFrame(detections)
             df[COORD_COLS] = pd.DataFrame(
                     data=np.vstack(df['window']),columns=COORD_COLS)
@@ -321,11 +341,16 @@ class ImagenetDetection(object):
             max_ind_each=predictions_df.idxmax(1)
             max_each=pd.concat([max_val_each,max_ind_each],axis=1)
             #max_each=max_each.rename(columns={0:'value',1:'category_id'})
-            max_each=max_each[max_each[0]>0]
+            temp=max_each[max_each[0]>-0.5]
+            if(temp.shape[0] == 0):
+                max_each=max_each.sort([0],ascending=False).head(1)
+            else:
+                max_each=temp
             max_each=max_each.join(df,how='inner')
             max_each=max_each.sort([0],ascending=False)
+            print max_each
             dets=np.vstack(max_each.values)
-            dets=self.nms_detections(dets)
+            dets=self.nms_detections(dets,0.05)
             max_each=pd.DataFrame(dets)
             max_each=max_each.rename(columns={0:'value',1:'category_id',2:'ymin',3:'xmin',4:'ymax',5:'xmax'})
             img=cv2.imread(imagefilename)
@@ -343,7 +368,7 @@ class ImagenetDetection(object):
             print endtime - midtime
             logging.info("Processed {} windows in {:.3f} s.".format(len(detections),endtime-starttime))
             return (True,result,result,'%.3f' % (endtime - starttime),newimagefilename) 
-
+            
 def start_tornado(app, port=5000):
     http_server = tornado.httpserver.HTTPServer(
         tornado.wsgi.WSGIContainer(app))
