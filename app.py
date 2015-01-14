@@ -17,8 +17,11 @@ import caffe
 import exifutil
 import skimage.io
 import cv2
+from sklearn import cluster
+import itertools
 from bing import Bing
 from bing import Boxes
+
 REPO_DIRNAME = os.path.abspath(os.path.dirname(__file__) + '/../..')
 UPLOAD_FOLDER = '/tmp/caffe_demos_uploads'
 ALLOWED_IMAGE_EXTENSIONS = set(['png', 'bmp', 'jpg', 'jpe', 'jpeg', 'gif'])
@@ -260,9 +263,14 @@ class ImagenetDetection(object):
         default_args['image_dim'] = 227
         default_args['channel_swap'] ='2,1,0'
         default_args['context_pad'] = 16
-
+        default_args['cluster_num'] = 10
+        default_args['top_k_in_cluster'] = 5
+        default_args['max_ratio'] = 4
+        default_args['min_size'] = 100
         def __init__(self,model_def_file, pretrained_model_file , mean_file , class_labels_file , bing_model , gpu_mode , raw_scale ,
-                image_dim , channel_swap , context_pad , input_scale = None ):
+                image_dim , channel_swap , context_pad , 
+                cluster_num , top_k_in_cluster ,  max_ratio , min_size ,
+                input_scale = None ):
 		logging.info('Loading net and associated files...')
                 mean , channel = None , None 
                 if mean_file:
@@ -287,6 +295,11 @@ class ImagenetDetection(object):
                         for l in f.readlines()
                         ])
                 self.labels = labels_df.sort('synset_id')
+                self.cluster_num = cluster_num
+                self.top_k_in_cluster = top_k_in_cluster
+                self.max_ratio = max_ratio
+                self.min_size = min_size
+                self.spectral = cluster.SpectralClustering(n_clusters=cluster_num,affinity='precomputed')
         def nms_detections(self,dets,overlap=0.1):
             x1 = dets[:,3]
             y1 = dets[:,2]
@@ -295,15 +308,15 @@ class ImagenetDetection(object):
             ind = np.argsort(dets[:,0])
             dets_len = len(ind)
 
-            if(dets_len <=5):
+            if(dets_len <=2):
                 pick=ind[:].tolist()[::-1]
                 return dets[pick,:]
             else:
-                pick=ind[-5:].tolist()[::-1]
+                pick=ind[-2:].tolist()[::-1]
             w = x2 - x1
             h = y2 - y1 
             area = (w*h).astype(float)
-            ind=ind[:-5]
+            ind=ind[:-2]
             while len(ind)>0:
                 i=ind[-1]
                 pick.append(i)
@@ -318,14 +331,57 @@ class ImagenetDetection(object):
                 o = wh/(area[i]+area[ind]-wh)
                 ind = ind[np.nonzero(o<=overlap)[0]]
             return dets[pick,:]
+        def cluster_boxes(self,boxes): 
+            ymins=np.array([ s for s in boxes.ymins() ]).astype(int)
+            ymaxs=np.array([ s for s in boxes.ymaxs() ]).astype(int)
+            xmins=np.array([ s for s in boxes.xmins() ]).astype(int)
+            xmaxs=np.array([ s for s in boxes.xmaxs() ]).astype(int)
+            #bing_windows=pd.DataFrame({0:ymins,1:xmins,2:ymaxs,3:xmaxs})
+            #return bing_windows
+            windows_size=len(xmins)
+            width=xmaxs-xmins
+            height=ymaxs-ymins
+            area=(width*height).astype(float)
+            distances=np.zeros((windows_size,windows_size))
+            for i in range(windows_size):
+                xx1 = np.maximum(xmins[i],xmins)
+                yy1 = np.maximum(ymins[i],ymins)
+                xx2 = np.minimum(xmaxs[i],xmaxs)
+                yy2 = np.minimum(ymaxs[i],ymaxs)
+                w = np.maximum(0.,xx2-xx1)
+                h = np.maximum(0.,yy2-yy1)
+                wh = w*h 
+                distances[i]=wh/(area[i]+area-wh)
+            starttimeInBoxes=time.time()
+            self.spectral.fit(distances)
+            endtimeInBoxes=time.time()
+            logging.info("Cluster speend {:.3f}".format(endtimeInBoxes-starttimeInBoxes))
+            starttimeInBoxes=time.time()
+            index_dictionary={}
+            for i in range(self.cluster_num):
+                index_dictionary[i]=[]
+            for i in range(windows_size):
+                if(area[i]<self.min_size):
+                    continue
+                if(width[i]*1.0/height[i]>self.max_ratio or height[i]*1.0/width[i]>self.max_ratio):
+                    continue
+                label=self.spectral.labels_[i]
+                if len(index_dictionary[label])>=self.top_k_in_cluster:
+                    continue
+                index_dictionary[label].append(i)
+            index_list=[]
+            for key in index_dictionary:
+                index_list.extend(index_dictionary[key])
+            
+            endtimeInBoxes=time.time()
+            logging.info("Cluster get top {} spend {:.3f}".format(self.top_k_in_cluster,endtimeInBoxes-starttimeInBoxes))
+            boxes=pd.DataFrame({0:ymins[index_list],1:xmins[index_list],2:ymaxs[index_list],3:xmaxs[index_list].tolist()})
+            return boxes
         def detect_image(self,imagefilename):
             starttime = time.time() 
             boxes = self.bing_search.getBoxesOfOneImage(imagefilename,130)
-            ymins=[ s for s in boxes.ymins() ]
-            ymaxs=[ s for s in boxes.ymaxs() ]
-            xmins=[ s for s in boxes.xmins() ]
-            xmaxs=[ s for s in boxes.xmaxs() ]
-            bing_windows=pd.DataFrame({0:ymins,1:xmins,2:ymaxs,3:xmaxs}) 
+            bing_windows=self.cluster_boxes(boxes)
+            #bing_windows=pd.DataFrame({0:ymins,1:xmins,2:ymaxs,3:xmaxs})
             logging.info("Processed bing get {} windows in {:.3f} s.".format(bing_windows.shape[0],time.time() - starttime))
             detections = self.net.detect_windows([(imagefilename,bing_windows.values)])
             #detections = self.net.detect_selective_search([imagefilename])
@@ -350,7 +406,7 @@ class ImagenetDetection(object):
             max_each=max_each.sort([0],ascending=False)
             print max_each
             dets=np.vstack(max_each.values)
-            dets=self.nms_detections(dets,0.05)
+            dets=self.nms_detections(dets,0.2)
             max_each=pd.DataFrame(dets)
             max_each=max_each.rename(columns={0:'value',1:'category_id',2:'ymin',3:'xmin',4:'ymax',5:'xmax'})
             img=cv2.imread(imagefilename)
