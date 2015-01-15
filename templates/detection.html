@@ -2,16 +2,12 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Image Classification And Detection">
-    <meta name="author" content="Luyifan ( Zhejiang University )">
-
-    <title>Image Classification And Detection</title>
-
-    <link href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" rel="stylesheet">
-
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
     <script type="text/javascript" src="//code.jquery.com/jquery-2.1.1.js"></script>
     <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+    <title>Image Classification And Detection</title>
+
 
     <!-- Script to instantly classify an image once it is uploaded. -->
     <script type="text/javascript">
@@ -28,7 +24,14 @@
         }
       );
     </script>
+    <style type="text/css">
+    	div#centerDiv {
+		width: 600px;
+		text-align: center;
+	}
+    </style>
 
+    <!--
     <style>
     body {
       font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -43,20 +46,22 @@
       border-bottom: 1px solid #ccc;
     }
     </style>
+    !-->
   </head>
 
   <body>
     <!-- Begin page content -->
+    <div class="jumbotron masthead">
+	    <div class="container">
+		    <h1>Image Classification And Detection</h1>
+		    <h2 align="center">Based on Deep Learning</h2>
+	    </div>
+    </div>
+
     <div class="container">
-      <div class="page-header">
-        <h1><a href="/">Image Classification And Detection</a></h1>
-        <p>
-          The <a href="http://caffe.berkeleyvision.org">Caffe</a> neural network library makes implementing state-of-the-art computer vision systems easy.
-        </p>
-      </div>
 
       <div>
-        <h2>Detection</h2>
+        <h2>Detection an image</h2>
         <a href="/detect_url?imageurl=http%3A%2F%2Fi.telegraph.co.uk%2Fmultimedia%2Farchive%2F02351%2Fcross-eyed-cat_2351472k.jpg">Click for a Quick Example</a>
       </div>
 
@@ -113,7 +118,7 @@
           <div class="input-group">
             <input type="text" class="form-control" name="imageurl" id="imageurl" placeholder="Provide an image URL">
             <span class="input-group-btn">
-              <input class="btn btn-primary" value="Classify URL" type="submit" id="detecturl"></input>
+              <input class="btn btn-primary" value="Detection URL" type="submit" id="detecturl"></input>
             </span>
           </div><!-- /input-group -->
         </div>
@@ -127,17 +132,28 @@
         <!--<input type="submit" class="btn btn-primary" value="Classify File" id="classifyfile"></input>-->
       </form>
     </div>
-
-    <hr>
-     
-
-
-
-
-    <div id="footer">
-      <div class="container">
-        <p>&copy; BVLC 2014</p>
-      </div>
    </div>
+   
+    <footer class="footer" style="margin-top: 10px;border-top-width: 50px;padding-top: 300px;">
+      <hr>
+      <div class="container" id="centerDiv">
+        <ul class="bs-docs-footer-links text-muted list-inline" >
+          <li>Currently v1.0.0</li>
+          <li>·</li>
+          <li><a href="https://github.com/luyifan">GitHub</a></li>
+          <li>·</li>
+          <li><a href="#">About</a></li>
+          <li>·</li>
+          <li><a href="#">Blog</a></li>
+          <li>·</li>
+          <li>
+              <span class="glyphicon glyphicon-copyright-mark" aria-hidden="true">&nbsp;鲁懿帆</span>
+          </li>
+          <li><span class="glyphicon glyphicon-thumbs-up" aria-hidden="true">&nbsp;指导老师：王东辉</span>
+          </li>
+
+        </ul>
+      </div>
+    </footer>
  </body>
 </html>
