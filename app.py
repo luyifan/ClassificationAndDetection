@@ -22,7 +22,9 @@ import itertools
 from bing import Bing
 from bing import Boxes
 
+
 REPO_DIRNAME = os.path.abspath(os.path.dirname(__file__) + '/../..')
+PROJECT_DIRNAME = os.path.abspath(os.path.dirname(__file__))
 UPLOAD_FOLDER = '/tmp/caffe_demos_uploads'
 ALLOWED_IMAGE_EXTENSIONS = set(['png', 'bmp', 'jpg', 'jpe', 'jpeg', 'gif'])
 COORD_COLS = ['ymin', 'xmin', 'ymax', 'xmax']
@@ -146,6 +148,46 @@ def detect_upload():
             'detection.html' , has_result=True,result=result,
             imagesrc=embed_image_html(image)
     )
+@app.route('/detect_local',methods=['GET'])
+def detect_local():
+    imagefilename=flask.request.args.get('imagefilename','')
+    if not allowed_file(imagefilename):
+        logging.info('Detect Local Image Error, not a image file')
+        return flask.render_template('detection.html',has_result=True,
+                result=(False,'Detect error image')
+                )
+    imagefilename=PROJECT_DIRNAME+"/static/"+imagefilename
+    if not os.path.isfile(imagefilename):
+        logging.info('Detect Local Image Error,%s',imagefilename)
+        return flask.render_template('detection.html',has_result=True,
+                result=(False,'Detect image path error')
+                )
+    result = app.det.detect_image(str(imagefilename))
+    image = exifutil.open_oriented_im(result[4])
+    return flask.render_template(
+           'detection.html' , has_result=True,result=result,
+           imagesrc=embed_image_html(image)
+    )
+
+@app.route('/classify_local',methods=['GET'])
+def classify_local():
+    imagefilename=flask.request.args.get('imagefilename','')
+    if not allowed_file(imagefilename):
+        logging.info('Classify Local Image Error, not a image file')
+        return flask.render_template('classification.html',has_result=True,
+                result=(False,'Classify error image')
+        )
+    imagefilename=PROJECT_DIRNAME+"/static/"+imagefilename
+    if not os.path.isfile(imagefilename):
+        logging.info('Classify Local Image Error,%s',imagefilename)
+        return flask.render_template('classification.html',has_result=True,
+                result=(False,'Classify image path error')
+                )
+    image=exifutil.open_oriented_im(imagefilename)
+    result=app.clf.classify_image(image)
+    return flask.render_template('classification.html',has_result=True,
+            result=result,imagesrc=embed_image_html(image)
+            )
 
 
 def embed_image_html(image):
