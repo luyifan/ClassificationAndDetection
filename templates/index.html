@@ -1,143 +1,158 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Image Classification And Detection">
-    <meta name="author" content="Luyifan ( Zhejiang University )">
+<head>
+<meta charset="UTF-8">
+<title>Example of Twitter Bootstrap 3 Carousel</title>
+<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+<style type="text/css">
+h2{
+    margin: 0;     
+    color: #666;
+    padding-top: 90px;
+    font-size: 52px;
+    font-family: "trebuchet ms", sans-serif;    
+}
+.item{
+    text-align: center;
+    height: 300px !important;
+}
 
-    <title>Image Classification And Detection</title>
+.bs-example{
+  margin: 10px;
+}
+.carousel-inner{
+    overflow: inherit;
+}
+.carousel-caption{
+position: relative;
+text-align: center;
+left: 0%
+}
+.jumbotron{
+    margin-bottom: 0px;
+}
+div#centerDiv {
+        width: 600px;
+        text-align: center;
+}
+</style>
+</head>
+<body>  
+<div class="jumbotron masthead">
+       <div class="container">
+          <h1>Image Classification And Detection</h1>
+          <h2 align="center">Based on Deep Learning</h2>
+       </div>
+       
 
-    <link href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" rel="stylesheet">
-
-    <script type="text/javascript" src="//code.jquery.com/jquery-2.1.1.js"></script>
-    <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
-
-    <!-- Script to instantly classify an image once it is uploaded. -->
-    <script type="text/javascript">
-      $(document).ready(
-        function(){
-          $('#classifyfile').attr('disabled',true);
-          $('#imagefile').change(
-            function(){
-              if ($(this).val()){
-                $('#formupload').submit();
-              }
-            }
-          );
-        }
-      );
-    </script>
-
-    <style>
-    body {
-      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-      line-height:1.5em;
-      color: #232323;
-      -webkit-font-smoothing: antialiased;
-    }
-
-    h1, h2, h3 {
-      font-family: Times, serif;
-      line-height:1.5em;
-      border-bottom: 1px solid #ccc;
-    }
-    </style>
-  </head>
-
-  <body>
-    <!-- Begin page content -->
-    <div class="container">
-      <div class="page-header">
-        <h1><a href="/">Image Classification And Detection</a></h1>
-        <p>
-          The <a href="http://caffe.berkeleyvision.org">Caffe</a> neural network library makes implementing state-of-the-art computer vision systems easy.
-        </p>
-      </div>
-
-      <div>
-        <h2>Classification</h2>
-        <a href="/classify_url?imageurl=http%3A%2F%2Fi.telegraph.co.uk%2Fmultimedia%2Farchive%2F02351%2Fcross-eyed-cat_2351472k.jpg">Click for a Quick Example</a>
-      </div>
-
-      {% if has_result %}
-      {% if not result[0] %}
-      <!-- we have error in the result. -->
-      <div class="alert alert-danger">{{ result[1] }} Did you provide a valid URL or a valid image file? </div>
-      {% else %}
-      <div class="media">
-        <a class="pull-left" href="#"><img class="media-object" width="192" height="192" src={{ imagesrc }}></a>
-        <div class="media-body">
-          <div class="bs-example bs-example-tabs">
-            <ul id="myTab" class="nav nav-tabs">
-              <li class="active"><a href="#infopred" data-toggle="tab">Maximally accurate</a></li>
-              <li><a href="#flatpred" data-toggle="tab">Maximally specific</a></li>
-            </ul>
-            <div id="myTabContent" class="tab-content">
-              <div class="tab-pane fade in active" id="infopred">
-                <ul class="list-group">
-                  {% for single_pred in result[2] %}
-                  <li class="list-group-item">
-                  <span class="badge">{{ single_pred[1] }}</span>
-                  <h4 class="list-group-item-heading">
-                    <a href="https://www.google.com/#q={{ single_pred[0] }}" target="_blank">{{ single_pred[0] }}</a>
-                  </h4>
-                  </li>
-                  {% endfor %}
-                </ul>
-              </div>
-              <div class="tab-pane fade" id="flatpred">
-                <ul class="list-group">
-                  {% for single_pred in result[1] %}
-                  <li class="list-group-item">
-                  <span class="badge">{{ single_pred[1] }}</span>
-                  <h4 class="list-group-item-heading">
-                    <a href="https://www.google.com/#q={{ single_pred[0] }}" target="_blank">{{ single_pred[0] }}</a>
-                  </h4>
-                  </li>
-                  {% endfor %}
-                </ul>
-              </div>
+  </div>
+  <div id="myCarousel" class="carousel slide" data-interval="3000" data-ride="carousel">
+      <!-- Carousel indicators -->
+        <ol class="carousel-indicators">
+            <li data-target="#myCarousel" data-slide-to="0" class="active"></li>
+            <li data-target="#myCarousel" data-slide-to="1"></li>
+            <li data-target="#myCarousel" data-slide-to="2"></li>
+        </ol>   
+       <!-- Carousel items -->
+        <div class="carousel-inner">
+            <div class="active item">
+                <div class="carousel-caption">
+                    <h1 style="color: #fb3300;">Classification</h1>
+                    <h3 style="color: #fb3300;">You can classify these images below or click "Go to classification" </h3>
+                </div>
+                <div class="col-xs-3">
+                    <a href="#" class="thumbnail">
+			    <img src="{{ url_for('static',filename='img/cat.jpg') }}" alt="125x125">
+                    </a>
+                </div>
+                <div class="col-xs-3">
+                    <a href="#" class="thumbnail">
+                        <img src="/static/img/bird.jpg" alt="125x125">
+                    </a>
+                </div>
+                <div class="col-xs-3">
+                    <a href="#" class="thumbnail">
+                        <img src="/static/img/corn.jpg" alt="125x125">
+                    </a>
+                </div>
+                <div class="col-xs-3">
+                    <a href="#" class="thumbnail">
+                        <img src="/static/img/car.jpg" alt="125x125">
+                    </a>
+                </div>
+                <p><a class="btn btn-lg btn-primary" href="/classification" role="button">Go to classification</a></p>
+                
             </div>
-          </div>
+            
+            <div class="item">
 
+                
+                <div class="carousel-caption">
+                    
+                    
+                    <h1 style="color: #fb3300;">Detection</h1>
+                    <h3 style="color: #fb3300;">You can detect these images below or click "Go to dection" </h3>
+                    
+                </div>
+                <div class="col-xs-3">
+                    <a href="#" class="thumbnail">
+                        <img src="/static/img/two-cat.jpg" alt="125x125">
+                    </a>
+                </div>
+                <div class="col-xs-3">
+                    <a href="#" class="thumbnail">
+                        <img src="/static/img/fish-bike.jpg" alt="125x125">
+                    </a>
+                </div>
+                <div class="col-xs-3">
+                    <a href="#" class="thumbnail">
+                        <img src="/static/img/person2.jpg" alt="125x125">
+                    </a>
+                </div>
+                <div class="col-xs-3">
+                    <a href="#" class="thumbnail">
+                        <img src="/static/img/two-dog.jpg" alt="125x125">
+                    </a>
+                </div>
+                
+                <p><a class="btn btn-lg btn-primary" href="/detection" role="button">Go to detection</a></p>
+            </div>
+            
+            
         </div>
-      </div>
-      <p> CNN took {{ result[3] }} seconds. </p>
-      {% endif %}
-      <hr>
-      {% endif %}
-
-      <form role="form" action="classify_url" method="get">
-        <div class="form-group">
-          <div class="input-group">
-            <input type="text" class="form-control" name="imageurl" id="imageurl" placeholder="Provide an image URL">
-            <span class="input-group-btn">
-              <input class="btn btn-primary" value="Classify URL" type="submit" id="classifyurl"></input>
-            </span>
-          </div><!-- /input-group -->
-        </div>
-      </form>
-
-      <form id="formupload" class="form-inline" role="form" action="classify_upload" method="post" enctype="multipart/form-data">
-        <div class="form-group">
-          <label for="imagefile">Or upload an image:</label>
-          <input type="file" name="imagefile" id="imagefile">
-        </div>
-        <!--<input type="submit" class="btn btn-primary" value="Classify File" id="classifyfile"></input>-->
-      </form>
+        <!-- Carousel nav -->
+        <a class="carousel-control left" href="#myCarousel" data-slide="prev">
+            <span class="glyphicon glyphicon-chevron-left"></span>
+        </a>
+        <a class="carousel-control right" href="#myCarousel" data-slide="next">
+            <span class="glyphicon glyphicon-chevron-right"></span>
+        </a>
     </div>
+    <footer class="footer" style="margin-top: 10px;border-top-width: 50px;padding-top: 300px;">
+      <hr>
+      <div class="container" id="centerDiv">
+        <ul class="bs-docs-footer-links text-muted list-inline" >
+          <li>Currently v1.0.0</li>
+          <li>·</li>
+          <li><a href="https://github.com/luyifan">GitHub</a></li>
+          <li>·</li>
+          <li><a href="#">About</a></li>
+          <li>·</li>
+          <li><a href="#">Blog</a></li>
+          <li>·</li>
+          <li>
+              <span class="glyphicon glyphicon-copyright-mark" aria-hidden="true">&nbsp;鲁懿帆</span>
+          </li>
+          <li><span class="glyphicon glyphicon-thumbs-up" aria-hidden="true">&nbsp;指导老师：王东辉</span>
+          </li>
 
-    <hr>
-     
-
-
-
-
-    <div id="footer">
-      <div class="container">
-        <p>&copy; BVLC 2014</p>
+        </ul>
       </div>
-   </div>
- </body>
-</html>
+    </footer>
+
+
+</body>
+</html>                                   
