@@ -3,10 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <title>Image Classification and Detection</title>
-<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" >
 <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
+<!--<link type="text/css" rel="stylesheet" href="{{ url_for('static',filename='css/jquery.qtip.css') }}"> !-->
+
+
 <script type="text/javascript" src="//code.jquery.com/jquery-2.1.1.js"></script>
 <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+<!--
+<script type="text/javascript" src="{{ url_for('static',filename='js/jquery.min.js')}}"></script>
+<script type="text/javascript" src="{{ url_for('static',filename='js/jquery.qtip.js')}}"></script>
+<script type="text/javascript" src="{{ url_for('static',filename='js/imagesloaded.pkg.min.js')}}"></script>
+<script type="text/javascript" src="{{ url_for('static',filename='js/test.js')}}"></script>
+!-->
 <style type="text/css">
 h2{
     margin: 0;     
@@ -19,7 +28,6 @@ h2{
     text-align: center;
     height: 300px !important;
 }
-
 .bs-example{
   margin: 10px;
 }
@@ -98,7 +106,9 @@ div#centerDiv {
                     
                 </div>
                 <div class="col-xs-3">
-                    <a href="/detect_local?imagefilename=img/two-cat.jpg" class="thumbnail">
+                    
+		    <a href="/detect_local?imagefilename=img/two-cat.jpg" class="thumbnail">
+
                         <img src="/static/img/two-cat.jpg" alt="125x125">
                     </a>
                 </div>
@@ -151,8 +161,7 @@ div#centerDiv {
 
         </ul>
       </div>
-    </footer>
-
+    </footer>	
 
 </body>
 </html>                                   

@@ -4,11 +4,15 @@
     <meta charset="utf-8">
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
-    <script type="text/javascript" src="//code.jquery.com/jquery-2.1.1.js"></script>
+    <!--<script type="text/javascript" src="//code.jquery.com/jquery-2.1.1.js"></script>!-->
     <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+    <link type="text/css" rel="stylesheet" href="{{ url_for('static',filename='css/jquery.qtip.css') }}">
+    <script type="text/javascript" src="{{ url_for('static',filename='js/jquery.min.js')}}"></script>
+    <script type="text/javascript" src="{{ url_for('static',filename='js/jquery.qtip.js')}}"></script>
+    <script type="text/javascript" src="{{ url_for('static',filename='js/imagesloaded.pkg.min.js')}}"></script>
+    <script type="text/javascript" src="{{ url_for('static',filename='js/luyifan.js')}}"></script>
+
     <title>Image Classification And Detection</title>
-
-
     <!-- Script to instantly classify an image once it is uploaded. -->
     <script type="text/javascript">
       $(document).ready(
@@ -28,6 +32,9 @@
     	div#centerDiv {
 		width: 600px;
 		text-align: center;
+	}
+	div#hidden{
+		display:none;
 	}
     </style>
 
@@ -71,8 +78,13 @@
       <div class="alert alert-danger">{{ result[1] }} Did you provide a valid URL or a valid image file? </div>
       {% else %}
       <div class="media">
-        <a class="pull-left" href="#"><img class="media-object" width="192" height="192" src={{ imagesrc }}></a>
-        <div class="media-body">
+        <a class="pull-left" href="#" id="origin_image" style="display:inline"><img class="media-object" width="256" height="256" src={{ imagesrc }}></a>
+	<div id="hidden">
+		<center>
+			<img src="{{ imagesrc }}" style="width:400px;height:400px;"></img>
+		</center>
+	</div>
+	<div class="media-body">
           <div class="bs-example bs-example-tabs">
             <ul id="myTab" class="nav nav-tabs">
               <li class="active"><a href="#infopred" data-toggle="tab">Maximally accurate</a></li>

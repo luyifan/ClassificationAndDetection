@@ -90,7 +90,7 @@ def detect_url():
     filename = os.path.join(UPLOAD_FOLDER,filename_)
     skimage.io.imsave(filename,image)
     logging.info('Saving to %s.',filename)
-    result = app.det.detect_image(filename)
+    result = app.det.detect_image(str(filename))
     image = exifutil.open_oriented_im(result[4])
     return flask.render_template(
             'detection.html' , has_result=True, result=result ,imagesrc=imageurl)
@@ -141,7 +141,7 @@ def detect_upload():
                 'detection.html' , has_result=True,
                 result=(False,'Cannot open uploded image.')
         )
-    result = app.det.detect_image(filename)
+    result = app.det.detect_image(str(filename))
     #print result
     image = exifutil.open_oriented_im(result[4])
     return flask.render_template(
