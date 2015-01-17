@@ -4,14 +4,9 @@
     <meta charset="utf-8">
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
-    <!--<script type="text/javascript" src="//code.jquery.com/jquery-2.1.1.js"></script>!-->
+    <script type="text/javascript" src="//code.jquery.com/jquery-2.1.1.js"></script>
     <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
-    <link type="text/css" rel="stylesheet" href="{{ url_for('static',filename='css/jquery.qtip.css') }}">
-    <script type="text/javascript" src="{{ url_for('static',filename='js/jquery.min.js')}}"></script>
-    <script type="text/javascript" src="{{ url_for('static',filename='js/jquery.qtip.js')}}"></script>
-    <script type="text/javascript" src="{{ url_for('static',filename='js/imagesloaded.pkg.min.js')}}"></script>
-    <script type="text/javascript" src="{{ url_for('static',filename='js/luyifan.js')}}"></script>
-
+    <script type="text/javascript" src="{{ url_for('static',filename='js/d3.min.js')}}"></script>
     <title>Image Classification And Detection</title>
     <!-- Script to instantly classify an image once it is uploaded. -->
     <script type="text/javascript">
@@ -78,32 +73,54 @@
       <div class="alert alert-danger">{{ result[1] }} Did you provide a valid URL or a valid image file? </div>
       {% else %}
       <div class="media">
-        <a class="pull-left" href="#" id="origin_image" style="display:inline"><img class="media-object" width="256" height="256" src={{ imagesrc }}></a>
-	<div id="hidden">
-		<center>
-			<img src="{{ imagesrc }}" style="width:400px;height:400px;"></img>
-		</center>
-	</div>
+        <a class="pull-left" href="#" id="origin"></a>
+	<script>
+		var height = 400;
+		var width = 400;
+		var svg = d3.select("#origin").append("svg").attr("width",width).attr("height",height);
+		function draw(){
+			svg.append("svg:image").attr("width", width).attr("height",height).attr("xlink:href","{{ imagesrc }} ")
+		}
+		draw();
+	</script>
 	<div class="media-body">
           <div class="bs-example bs-example-tabs">
             <ul id="myTab" class="nav nav-tabs">
               <li class="active"><a href="#infopred" data-toggle="tab">Maximally accurate</a></li>
-              <li><a href="#flatpred" data-toggle="tab">Maximally specific</a></li>
+	      <!--<li><a href="#flatpred" data-toggle="tab">Maximally specific</a></li>!-->
             </ul>
             <div id="myTabContent" class="tab-content">
               <div class="tab-pane fade in active" id="infopred">
                 <ul class="list-group">
-                  {% for single_pred in result[2] %}
+                  {% for single_pred in result[1] %}
                   <li class="list-group-item">
                   <span class="badge">{{ single_pred[1] }}</span>
                   <h4 class="list-group-item-heading">
-                    <a href="https://www.google.com/#q={{ single_pred[0] }}" target="_blank">{{ single_pred[0] }}</a>
+			  <a href="https://www.google.com/#q={{ single_pred[0] }}" id="prediction_{{ single_pred[2] }}" target="_blank">{{ single_pred[0] }}</a>
                   </h4>
+		  <script>
+			function drawBox(){
+				var ymin = height * {{ single_pred[3] }};
+				var ylen = height * {{ single_pred[4] }};
+				var xmin = width * {{ single_pred[5] }};
+				var xlen = width * {{ single_pred[6] }};
+				svg.append("svg:rect").attr("id", "box_{{ single_pred[2] }}").attr("x",xmin).attr("y",ymin).attr("width",xlen).attr("height", ylen).style("fill-opacity", 0.2).style("fill","red").style("stroke-width", "5px").style("stroke", "red").style('visibility', 'hidden');
+				var a = d3.select("#prediction_{{ single_pred[2]}}");
+				a.on("mouseover",function(){
+					d3.select("#box_{{ single_pred[2] }}").style('visibility', 'visible');		
+				}).on("mouseout",function(){
+					d3.select("#box_{{ single_pred[2] }}").style('visibility', 'hidden');
+				});
+
+
+			}
+			drawBox();
+		  </script>
                   </li>
                   {% endfor %}
                 </ul>
               </div>
-              <div class="tab-pane fade" id="flatpred">
+              <!--<div class="tab-pane fade" id="flatpred">
                 <ul class="list-group">
                   {% for single_pred in result[1] %}
                   <li class="list-group-item">
@@ -115,6 +132,7 @@
                   {% endfor %}
                 </ul>
               </div>
+		!-->
             </div>
           </div>
 

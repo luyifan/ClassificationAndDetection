@@ -25,7 +25,9 @@ from bing import Boxes
 
 REPO_DIRNAME = os.path.abspath(os.path.dirname(__file__) + '/../..')
 PROJECT_DIRNAME = os.path.abspath(os.path.dirname(__file__))
-UPLOAD_FOLDER = '/tmp/caffe_demos_uploads'
+IMAGE_PREFIX = "/static/temp/"
+UPLOAD_FOLDER = PROJECT_DIRNAME + IMAGE_PREFIX
+
 ALLOWED_IMAGE_EXTENSIONS = set(['png', 'bmp', 'jpg', 'jpe', 'jpeg', 'gif'])
 COORD_COLS = ['ymin', 'xmin', 'ymax', 'xmax']
 RECTANGLE_COLOR = (0,0,255)
@@ -64,9 +66,17 @@ def classify_url():
         )
 
     logging.info('Image: %s', imageurl)
+    filename_ = str(datetime.datetime.now()).replace(' ','_') + \
+            imageurl.split('/')[-1]
+    filename = os.path.join(UPLOAD_FOLDER,filename_)
+    skimage.io.imsave(filename,image)
+    logging.info('Saving to %s.',filename)
     result = app.clf.classify_image(image)
     return flask.render_template(
-        'classification.html', has_result=True, result=result, imagesrc=imageurl)
+        'classification.html', has_result=True, result=result, 
+        imagesrc=embed_image_html(image)
+        #imagesrc=IMAGE_PREFIX+filename_)
+        )
 
 @app.route('/detect_url',methods=['GET'])
 def detect_url():
@@ -91,12 +101,11 @@ def detect_url():
     skimage.io.imsave(filename,image)
     logging.info('Saving to %s.',filename)
     result = app.det.detect_image(str(filename))
-    image = exifutil.open_oriented_im(result[4])
     return flask.render_template(
-            'detection.html' , has_result=True, result=result ,imagesrc=imageurl)
-
-
-
+            'detection.html' , has_result=True, result=result ,
+            imagesrc=embed_image_html(image)
+            #imagesrc=IMAGE_PREFIX+filename_)
+            )
 
 @app.route('/classify_upload', methods=['POST'])
 def classify_upload():
@@ -105,7 +114,7 @@ def classify_upload():
         imagefile = flask.request.files['imagefile']
         filename_ = str(datetime.datetime.now()).replace(' ', '_') + \
             werkzeug.secure_filename(imagefile.filename)
-        filename = os.path.join(UPLOAD_FOLDER, filename_)
+        filename = os.path.join(UPLOAD_FOLDER,filename_)
         imagefile.save(filename)
         logging.info('Saving to %s.', filename)
         image = exifutil.open_oriented_im(filename)
@@ -120,6 +129,7 @@ def classify_upload():
     result = app.clf.classify_image(image)
     return flask.render_template(
         'classification.html', has_result=True, result=result,
+        #imagesrc=IMAGE_PREFIX+filename_
         imagesrc=embed_image_html(image)
     )
 
@@ -143,41 +153,43 @@ def detect_upload():
         )
     result = app.det.detect_image(str(filename))
     #print result
-    image = exifutil.open_oriented_im(result[4])
+    image = exifutil.open_oriented_im(str(filename))
     return flask.render_template(
             'detection.html' , has_result=True,result=result,
+            #imagesrc=IMAGE_PREFIX+filename_
             imagesrc=embed_image_html(image)
     )
 @app.route('/detect_local',methods=['GET'])
 def detect_local():
-    imagefilename=flask.request.args.get('imagefilename','')
-    if not allowed_file(imagefilename):
+    filename_=flask.request.args.get('imagefilename','')
+    if not allowed_file(filename_):
         logging.info('Detect Local Image Error, not a image file')
         return flask.render_template('detection.html',has_result=True,
                 result=(False,'Detect error image')
                 )
-    imagefilename=PROJECT_DIRNAME+"/static/"+imagefilename
+    imagefilename=PROJECT_DIRNAME+"/static/"+filename_
     if not os.path.isfile(imagefilename):
         logging.info('Detect Local Image Error,%s',imagefilename)
         return flask.render_template('detection.html',has_result=True,
                 result=(False,'Detect image path error')
                 )
     result = app.det.detect_image(str(imagefilename))
-    image = exifutil.open_oriented_im(result[4])
+    image = exifutil.open_oriented_im(str(imagefilename))
     return flask.render_template(
            'detection.html' , has_result=True,result=result,
+           #imagesrc="/static/"+filename_
            imagesrc=embed_image_html(image)
     )
 
 @app.route('/classify_local',methods=['GET'])
 def classify_local():
-    imagefilename=flask.request.args.get('imagefilename','')
-    if not allowed_file(imagefilename):
+    filename_=flask.request.args.get('imagefilename','')
+    if not allowed_file(filename_):
         logging.info('Classify Local Image Error, not a image file')
         return flask.render_template('classification.html',has_result=True,
                 result=(False,'Classify error image')
         )
-    imagefilename=PROJECT_DIRNAME+"/static/"+imagefilename
+    imagefilename=PROJECT_DIRNAME+"/static/"+filename_
     if not os.path.isfile(imagefilename):
         logging.info('Classify Local Image Error,%s',imagefilename)
         return flask.render_template('classification.html',has_result=True,
@@ -185,8 +197,9 @@ def classify_local():
                 )
     image=exifutil.open_oriented_im(imagefilename)
     result=app.clf.classify_image(image)
-    return flask.render_template('classification.html',has_result=True,
-            result=result,imagesrc=embed_image_html(image)
+    return flask.render_template('classification.html',has_result=True,result=result,
+            #imagesrc="/static/"+filename_
+            imagesrc=embed_image_html(image)
             )
 
 
@@ -452,20 +465,25 @@ class ImagenetDetection(object):
             max_each=pd.DataFrame(dets)
             max_each=max_each.rename(columns={0:'value',1:'category_id',2:'ymin',3:'xmin',4:'ymax',5:'xmax'})
             img=cv2.imread(imagefilename)
-            font=cv2.FONT_ITALIC
+            image_size=img.shape[:-1]
+            print image_size
+            #font=cv2.FONT_ITALIC
             result=[]
+            index_box=0
             for index , row in max_each.iterrows():
-                (xmin,ymin,xmax,ymax,label)=(int(row['xmin']),int(row['ymin']),int(row['xmax']),int(row['ymax']),self.labels.loc[int(row['category_id']),'name'])
-                cv2.rectangle(img,(xmin,ymin),(xmax,ymax),RECTANGLE_COLOR,3)
-                result.append((label,row['value']))
-                cv2.putText(img,label,(xmin+10,ymin+10),font,0.5,TEXT_COLOR,1)
-            newimagelist=imagefilename.rsplit('.',1)
-            newimagefilename=newimagelist[0]+'Result.'+newimagelist[1]
-            cv2.imwrite(newimagefilename,img)
+                index_box=index_box+1
+                label=self.labels.loc[int(row['category_id']),'name']
+                #(xmin,ymin,xmax,ymax,label)=(int(row['xmin']),int(row['ymin']),int(row['xmax']),int(row['ymax']),self.labels.loc[int(row['category_id']),'name'])
+                #cv2.rectangle(img,(xmin,ymin),(xmax,ymax),RECTANGLE_COLOR,3)
+                result.append((label,row['value'],index_box,row['ymin']/image_size[0],(row['ymax']-row['ymin'])/image_size[0],row['xmin']/image_size[1],(row['xmax']-row['xmin'])/image_size[1]))
+                #cv2.putText(img,label,(xmin+10,ymin+10),font,0.5,TEXT_COLOR,1)
+            #newimagelist=imagefilename.rsplit('.',1)
+            #newimagefilename=newimagelist[0]+'Result.'+newimagelist[1]
+            #cv2.imwrite(newimagefilename,img)
             endtime=time.time()
             print endtime - midtime
             logging.info("Processed {} windows in {:.3f} s.".format(len(detections),endtime-starttime))
-            return (True,result,result,'%.3f' % (endtime - starttime),newimagefilename) 
+            return (True,result,result,'%.3f' % (endtime - starttime)) 
             
 def start_tornado(app, port=5000):
     http_server = tornado.httpserver.HTTPServer(
