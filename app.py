@@ -22,8 +22,6 @@ import itertools
 from bing import Bing
 from bing import Boxes
 
-
-REPO_DIRNAME = os.path.abspath(os.path.dirname(__file__) + '/../..')
 PROJECT_DIRNAME = os.path.abspath(os.path.dirname(__file__))
 IMAGE_PREFIX = "/static/temp/"
 UPLOAD_FOLDER = PROJECT_DIRNAME + IMAGE_PREFIX
@@ -223,15 +221,15 @@ def allowed_file(filename):
 class ImagenetClassifier(object):
     default_args = {
         'model_def_file': (
-            '{}/models/bvlc_reference_caffenet/deploy.prototxt'.format(REPO_DIRNAME)),
+            '{}/models/bvlc_reference_caffenet/deploy.prototxt'.format(PROJECT_DIRNAME)),
         'pretrained_model_file': (
-            '{}/models/bvlc_reference_caffenet/bvlc_reference_caffenet.caffemodel'.format(REPO_DIRNAME)),
+            '{}/models/bvlc_reference_caffenet/bvlc_reference_caffenet.caffemodel'.format(PROJECT_DIRNAME)),
         'mean_file': (
-            '{}/python/caffe/imagenet/ilsvrc_2012_mean.npy'.format(REPO_DIRNAME)),
+            '{}/models/ilsvrc12/ilsvrc_2012_mean.npy'.format(PROJECT_DIRNAME)),
         'class_labels_file': (
-            '{}/data/ilsvrc12/synset_words.txt'.format(REPO_DIRNAME)),
+            '{}/models/ilsvrc12/synset_words.txt'.format(PROJECT_DIRNAME)),
         'bet_file': (
-            '{}/data/ilsvrc12/imagenet.bet.pickle'.format(REPO_DIRNAME)),
+            '{}/models/ilsvrc12/imagenet.bet.pickle'.format(PROJECT_DIRNAME)),
     }
     for key, val in default_args.iteritems():
         if not os.path.exists(val):
@@ -301,18 +299,18 @@ class ImagenetClassifier(object):
 class ImagenetDetection(object):
 	default_args = {
 			'model_def_file':(
-				'{}/models/bvlc_reference_rcnn_ilsvrc13/deploy.prototxt'.format(REPO_DIRNAME)),
+				'{}/models/bvlc_reference_rcnn_ilsvrc13/deploy.prototxt'.format(PROJECT_DIRNAME)),
 			'pretrained_model_file':(
-				'{}/models/bvlc_reference_rcnn_ilsvrc13/bvlc_reference_rcnn_ilsvrc13.caffemodel'.format(REPO_DIRNAME)),
+				'{}/models/bvlc_reference_rcnn_ilsvrc13/bvlc_reference_rcnn_ilsvrc13.caffemodel'.format(PROJECT_DIRNAME)),
 			'mean_file': (
-				'{}/python/caffe/imagenet/ilsvrc_2012_mean.npy'.format(REPO_DIRNAME)),
+				'{}/models/ilsvrc12/ilsvrc_2012_mean.npy'.format(PROJECT_DIRNAME)),
 			'class_labels_file':(
-				'{}/data/ilsvrc12/det_synset_words.txt'.format(REPO_DIRNAME)),
+				'{}/models/ilsvrc12/det_synset_words.txt'.format(PROJECT_DIRNAME)),
         }
 	for key , val in default_args.iteritems():
 		if not os.path.exists(val):
 			raise Exception("File for {} is missing. Should be at: {}".format(key, val))
-	default_args['bing_model'] = '{}/examples/ClassificationAndDetection/bing/model/ObjNessB2W8MAXBGR'.format(REPO_DIRNAME)
+	default_args['bing_model'] = '{}/models/bing/ObjNessB2W8MAXBGR'.format(PROJECT_DIRNAME)
         default_args['gpu_mode'] = False
         default_args['raw_scale'] = 255
         default_args['image_dim'] = 227

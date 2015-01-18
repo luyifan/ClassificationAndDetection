@@ -31,6 +31,11 @@
 	div#hidden{
 		display:none;
 	}
+
+	#image-upload > input
+	{
+		    display: none;
+	}
     </style>
 
     <!--
@@ -148,18 +153,19 @@
           <div class="input-group">
             <input type="text" class="form-control" name="imageurl" id="imageurl" placeholder="Provide an image URL">
             <span class="input-group-btn">
-              <input class="btn btn-primary" value="Detection URL" type="submit" id="detecturl"></input>
+            <input class="btn btn-danger" value="Detection URL" type="submit" id="detecturl"></input>
             </span>
           </div><!-- /input-group -->
         </div>
       </form>
 
       <form id="formupload" class="form-inline" role="form" action="detect_upload" method="post" enctype="multipart/form-data">
-        <div class="form-group">
-          <label for="imagefile">Or upload an image:</label>
-          <input type="file" name="imagefile" id="imagefile">
+        
+        <div class="form-group" id="image-upload">
+		<label for="imagefile">Or upload an image:</br><img src="/static/img/upload.png" /></label>
+		<input type="file" name="imagefile" id="imagefile">
         </div>
-        <!--<input type="submit" class="btn btn-primary" value="Classify File" id="classifyfile"></input>-->
+	<!--<input type="submit" class="btn btn-primary" value="Classify File" id="classifyfile"></input>-->
       </form>
     </div>
    </div>
