@@ -316,7 +316,7 @@ class ImagenetDetection(object):
         default_args['image_dim'] = 227
         default_args['channel_swap'] ='2,1,0'
         default_args['context_pad'] = 16
-        default_args['cluster_num'] = 10
+        default_args['cluster_num'] = 20
         default_args['top_k_in_cluster'] = 5
         default_args['max_ratio'] = 4
         default_args['min_size'] = 100
@@ -361,15 +361,15 @@ class ImagenetDetection(object):
             ind = np.argsort(dets[:,0])
             dets_len = len(ind)
 
-            if(dets_len <=2):
+            if(dets_len <=1):
                 pick=ind[:].tolist()[::-1]
                 return dets[pick,:]
             else:
-                pick=ind[-2:].tolist()[::-1]
+                pick=ind[-1:].tolist()[::-1]
             w = x2 - x1
             h = y2 - y1 
             area = (w*h).astype(float)
-            ind=ind[:-2]
+            ind=ind[:-1]
             while len(ind)>0:
                 i=ind[-1]
                 pick.append(i)
@@ -459,7 +459,7 @@ class ImagenetDetection(object):
             max_each=max_each.sort([0],ascending=False)
             print max_each
             dets=np.vstack(max_each.values)
-            dets=self.nms_detections(dets,0.2)
+            dets=self.nms_detections(dets,0.1)
             max_each=pd.DataFrame(dets)
             max_each=max_each.rename(columns={0:'value',1:'category_id',2:'ymin',3:'xmin',4:'ymax',5:'xmax'})
             img=cv2.imread(imagefilename)
