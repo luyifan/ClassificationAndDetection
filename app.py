@@ -16,7 +16,6 @@ import urllib
 import caffe
 import exifutil
 import skimage.io
-import cv2
 from sklearn import cluster
 import itertools
 from bing import Bing
@@ -517,7 +516,7 @@ def start_from_terminal(app):
     # Initialize detection
     app.det = ImagenetDetection(**ImagenetDetection.default_args)
     if opts.debug:
-	app.run(debug=True, host='10.13.94.41', port=opts.port)
+	app.run(debug=True, host='10.214.34.104', port=opts.port)
     else:
         start_tornado(app, opts.port)
 
