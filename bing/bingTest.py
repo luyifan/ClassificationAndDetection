@@ -6,13 +6,17 @@ import time
 import cv2 
 import itertools
 from sklearn import cluster
+import sys
+import pickle
+import copy
+print sys.argv[1]
 b = Bing(2,8,2);
-imageFilename="/home/deepnet/Desktop/VOC2007/JPEGImages/000019.jpg"
-cluster_num=3
-top_k=5
+imageFilename="../static/temp/"+sys.argv[1]
+cluster_num=10
+top_k=10
 max_ratio=4
 min_size=100
-b.loadTrainModel("/home/deepnet/Desktop/VOC2007/Results/ObjNessB2W8MAXBGR")
+b.loadTrainModel("../models/bing/ObjNessB2W8MAXBGR")
 boxes=b.getBoxesOfOneImage(imageFilename,130)
 values=[ s for s in boxes.values() ]
 ymins=[ s for s in boxes.ymins() ]
@@ -81,14 +85,24 @@ label=spectral.labels_[index_list]
 windows_size=len(index_list)
 endtime=time.time()
 color=np.random.randint(0,255,(cluster_num,3))
+#output = open("test.pkl",'wb')
+#pickle.dump(color,output)
+#output.close()
 img=cv2.imread(imageFilename)
+local_img=[]
+for i in range(cluster_num):
+    local_img.append(copy.copy(img))
 for i in range(windows_size):
     #print label
     #if not (label[i] == 0):
     #    continue
     #print color[label].tolist()
+    label_i = label[i]
     cv2.rectangle(img,(x1[i],y1[i]),(x2[i],y2[i]),color[label[i]].tolist(),3)
+    cv2.rectangle(local_img[label_i],(x1[i],y1[i]),(x2[i],y2[i]),color[label_i].tolist(),3)
 
-cv2.imwrite("test.jpg",img)
+cv2.imwrite("test/test.jpg",img)
+for i in range(cluster_num):
+    cv2.imwrite("test/test"+str(i)+".jpg",local_img[i])
 endtime=time.time()
 print "{:.3f}".format(endtime-starttime)

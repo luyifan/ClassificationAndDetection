@@ -16,6 +16,7 @@ import urllib
 import caffe
 import exifutil
 import skimage.io
+import cv2
 from sklearn import cluster
 import itertools
 from bing import Bing
@@ -315,7 +316,7 @@ class ImagenetDetection(object):
         default_args['image_dim'] = 227
         default_args['channel_swap'] ='2,1,0'
         default_args['context_pad'] = 16
-        default_args['cluster_num'] = 20
+        default_args['cluster_num'] = 10
         default_args['top_k_in_cluster'] = 5
         default_args['max_ratio'] = 4
         default_args['min_size'] = 100
