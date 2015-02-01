@@ -317,7 +317,7 @@ class ImagenetDetection(object):
         default_args['channel_swap'] ='2,1,0'
         default_args['context_pad'] = 16
         default_args['cluster_num'] = 10
-        default_args['top_k_in_cluster'] = 5
+        default_args['top_k_in_cluster'] = 10
         default_args['max_ratio'] = 4
         default_args['min_size'] = 100
         def __init__(self,model_def_file, pretrained_model_file , mean_file , class_labels_file , bing_model , gpu_mode , raw_scale ,
@@ -353,36 +353,64 @@ class ImagenetDetection(object):
                 self.max_ratio = max_ratio
                 self.min_size = min_size
                 self.spectral = cluster.SpectralClustering(n_clusters=cluster_num,affinity='precomputed')
-        def nms_detections(self,dets,overlap=0.1):
+        def removeIOUandOverlap(self,i,index,x1,y1,x2,y2,area,iou,overlap):
+            xx1 = np.maximum(x1[i],x1[index])
+            yy1 = np.maximum(y1[i],y1[index])
+            xx2 = np.minimum(x2[i],x2[index])
+            yy2 = np.minimum(y2[i],y2[index])
+            w = np.maximum(0.,xx2 - xx1)
+            h = np.maximum(0.,yy2 - yy1)
+            wh = w*h
+            o = wh/(area[i]+area[index]-wh)
+            oo = wh/np.minimum(area[i],area[index])
+            first_match=np.nonzero(o<=iou)[0]
+            second_match=np.nonzero(oo<=overlap)[0]
+            index=index[np.intersect1d(second_match,first_match)]
+            return index
+
+        def nms_detections(self,dets,iou=0.1,overlap=0.8):
             x1 = dets[:,3]
             y1 = dets[:,2]
             x2 = dets[:,5]
             y2 = dets[:,4]
             ind = np.argsort(dets[:,0])
-            dets_len = len(ind)
-
-            if(dets_len <=1):
-                pick=ind[:].tolist()[::-1]
-                return dets[pick,:]
-            else:
-                pick=ind[-1:].tolist()[::-1]
+            dets_len = len(ind) 
+            threshold = -0.2
+            count = 0
+            for i in ind:
+                if dets[i,0]>=threshold:
+                    ind_one = ind[:count]
+                    ind_two = ind[count:]
+                    break
+                count+=1
+                
+            #pick=ind[:].tolist()[::-1]
+            #return dets[pick,:]
+            
+            #if(dets_len <=1):
+            #    pick=ind[:].tolist()[::-1]
+            #    return dets[pick,:]
+            #else:
+            #    pick=ind[-1:].tolist()[::-1]
             w = x2 - x1
             h = y2 - y1 
             area = (w*h).astype(float)
-            ind=ind[:-1]
-            while len(ind)>0:
-                i=ind[-1]
+            #ind=ind[:-1]
+            pick=[]
+            #pick=ind[:].tolist()[::-1]
+            while len(ind_two)>0:
+                i=ind_two[-1]
                 pick.append(i)
-                ind =ind[:-1]
-                xx1 = np.maximum(x1[i],x1[ind])
-                yy1 = np.maximum(y1[i],y1[ind])
-                xx2 = np.minimum(x2[i],x2[ind])
-                yy2 = np.minimum(y2[i],y2[ind])
-                w = np.maximum(0., xx2 - xx1)
-                h = np.maximum(0., yy2 - yy1)
-                wh = w*h
-                o = wh/(area[i]+area[ind]-wh)
-                ind = ind[np.nonzero(o<=overlap)[0]]
+                ind_two = ind_two[:-1]
+                ind_two=self.removeIOUandOverlap(i,ind_two,x1,y1,x2,y2,area,iou*3,overlap)
+                ind_one=self.removeIOUandOverlap(i,ind_one,x1,y1,x2,y2,area,iou,overlap)
+            while len(ind_one)>0:
+                i=ind_one[-1]
+                pick.append(i)
+                ind_one = ind_one[:-1]
+                ind_one=self.removeIOUandOverlap(i,ind_one,x1,y1,x2,y2,area,iou,overlap)
+
+            pick.extend(ind[:].tolist()[::-1])
             return dets[pick,:]
         def cluster_boxes(self,boxes): 
             ymins=np.array([ s for s in boxes.ymins() ]).astype(int)
@@ -450,7 +478,7 @@ class ImagenetDetection(object):
             max_ind_each=predictions_df.idxmax(1)
             max_each=pd.concat([max_val_each,max_ind_each],axis=1)
             #max_each=max_each.rename(columns={0:'value',1:'category_id'})
-            temp=max_each[max_each[0]>-0.5]
+            temp=max_each[max_each[0]>-1.0]
             if(temp.shape[0] == 0):
                 max_each=max_each.sort([0],ascending=False).head(1)
             else:
@@ -459,12 +487,11 @@ class ImagenetDetection(object):
             max_each=max_each.sort([0],ascending=False)
             print max_each
             dets=np.vstack(max_each.values)
-            dets=self.nms_detections(dets,0.1)
+            dets=self.nms_detections(dets,0.1,0.8)
             max_each=pd.DataFrame(dets)
             max_each=max_each.rename(columns={0:'value',1:'category_id',2:'ymin',3:'xmin',4:'ymax',5:'xmax'})
             img=cv2.imread(imagefilename)
             image_size=img.shape[:-1]
-            print image_size
             #font=cv2.FONT_ITALIC
             result=[]
             index_box=0
@@ -479,7 +506,7 @@ class ImagenetDetection(object):
             #newimagefilename=newimagelist[0]+'Result.'+newimagelist[1]
             #cv2.imwrite(newimagefilename,img)
             endtime=time.time()
-            print endtime - midtime
+            #print endtime - midtime
             logging.info("Processed {} windows in {:.3f} s.".format(len(detections),endtime-starttime))
             return (True,result,result,'%.3f' % (endtime - starttime)) 
             

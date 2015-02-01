@@ -13,7 +13,7 @@ print sys.argv[1]
 b = Bing(2,8,2);
 imageFilename="../static/temp/"+sys.argv[1]
 cluster_num=10
-top_k=10
+top_k=20
 max_ratio=4
 min_size=100
 b.loadTrainModel("../models/bing/ObjNessB2W8MAXBGR")
