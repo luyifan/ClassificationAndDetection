@@ -409,9 +409,8 @@ class ImagenetDetection(object):
                 pick.append(i)
                 ind_one = ind_one[:-1]
                 ind_one=self.removeIOUandOverlap(i,ind_one,x1,y1,x2,y2,area,iou,overlap)
-
-            pick.extend(ind[:].tolist()[::-1])
             return dets[pick,:]
+        
         def cluster_boxes(self,boxes): 
             ymins=np.array([ s for s in boxes.ymins() ]).astype(int)
             ymaxs=np.array([ s for s in boxes.ymaxs() ]).astype(int)
@@ -486,14 +485,17 @@ class ImagenetDetection(object):
             max_each=max_each.join(df,how='inner')
             max_each=max_each.sort([0],ascending=False)
             print max_each
-            dets=np.vstack(max_each.values)
-            dets=self.nms_detections(dets,0.1,0.8)
+            dets_all=np.vstack(max_each.values)
+            dets=self.nms_detections(dets_all,0.1,0.8)
+            max_all=max_each.rename(columns={0:'value',1:'category_id',2:'ymin',3:'xmin',4:'ymax',5:'xmax'})
             max_each=pd.DataFrame(dets)
             max_each=max_each.rename(columns={0:'value',1:'category_id',2:'ymin',3:'xmin',4:'ymax',5:'xmax'})
+            print max_each
             img=cv2.imread(imagefilename)
             image_size=img.shape[:-1]
             #font=cv2.FONT_ITALIC
             result=[]
+            result_all=[]
             index_box=0
             for index , row in max_each.iterrows():
                 index_box=index_box+1
@@ -505,10 +507,14 @@ class ImagenetDetection(object):
             #newimagelist=imagefilename.rsplit('.',1)
             #newimagefilename=newimagelist[0]+'Result.'+newimagelist[1]
             #cv2.imwrite(newimagefilename,img)
+            for index , row in max_all.iterrows():
+                index_box=index_box+1
+                label=self.labels.loc[int(row['category_id']),'name']
+                result_all.append((label,row['value'],index_box,row['ymin']/image_size[0],(row['ymax']-row['ymin'])/image_size[0],row['xmin']/image_size[1],(row['xmax']-row['xmin'])/image_size[1]))
             endtime=time.time()
             #print endtime - midtime
             logging.info("Processed {} windows in {:.3f} s.".format(len(detections),endtime-starttime))
-            return (True,result,result,'%.3f' % (endtime - starttime)) 
+            return (True,result,result_all,'%.3f' % (endtime - starttime)) 
             
 def start_tornado(app, port=5000):
     http_server = tornado.httpserver.HTTPServer(

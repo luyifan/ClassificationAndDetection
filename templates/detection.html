@@ -117,8 +117,8 @@
 	<div class="media-body">
           <div class="bs-example bs-example-tabs">
             <ul id="myTab" class="nav nav-tabs">
-              <li class="active"><a href="#infopred" data-toggle="tab">Maximally accurate</a></li>
-	      <!--<li><a href="#flatpred" data-toggle="tab">Maximally specific</a></li>!-->
+              <li class="active"><a href="#infopred" data-toggle="tab">Non-maximum Suppression  Result</a></li>
+	      <li><a href="#flatpred" data-toggle="tab">No Suppression Result</a></li>
             </ul>
             <div id="myTabContent" class="tab-content">
               <div class="tab-pane fade in active" id="infopred">
@@ -151,19 +151,35 @@
                   {% endfor %}
                 </ul>
               </div>
-              <!--<div class="tab-pane fade" id="flatpred">
+              <div class="tab-pane fade" id="flatpred"> 
                 <ul class="list-group">
-                  {% for single_pred in result[1] %}
+                  {% for single_pred in result[2] %}
                   <li class="list-group-item">
                   <span class="badge">{{ single_pred[1] }}</span>
                   <h4 class="list-group-item-heading">
-                    <a href="https://www.google.com/#q={{ single_pred[0] }}" target="_blank">{{ single_pred[0] }}</a>
+			  <a href="https://www.google.com/#q={{ single_pred[0] }}" id="prediction_{{ single_pred[2] }}" target="_blank">{{ single_pred[0] }}</a>
                   </h4>
+		  <script>
+			function drawBox(){
+				var ymin = height * {{ single_pred[3] }};
+				var ylen = height * {{ single_pred[4] }};
+				var xmin = width * {{ single_pred[5] }};
+				var xlen = width * {{ single_pred[6] }};
+				svg.append("svg:rect").attr("id", "box_{{ single_pred[2] }}").attr("x",xmin).attr("y",ymin).attr("width",xlen).attr("height", ylen).style("fill-opacity", 0.2).style("fill","red").style("stroke-width", "5px").style("stroke", "red").style('visibility', 'hidden');
+				var a = d3.select("#prediction_{{ single_pred[2]}}");
+				a.on("mouseover",function(){
+					d3.select("#box_{{ single_pred[2] }}").style('visibility', 'visible');		
+				}).on("mouseout",function(){
+					d3.select("#box_{{ single_pred[2] }}").style('visibility', 'hidden');
+	      
+				});
+			}
+			drawBox();
+		  </script>
                   </li>
                   {% endfor %}
                 </ul>
               </div>
-		!-->
             </div>
           </div>
 
