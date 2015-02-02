@@ -39,6 +39,15 @@
 	.navbar{
 		margin-bottom:0px;
 	}
+	.badge{
+		font-size:20px;
+	}
+	.nav-tabs {
+		font-size:20px;
+	}
+	p{
+		font-size:20px;
+	}
     </style>
 
     <!--
@@ -94,7 +103,7 @@
     <div class="container">
 
       <div>
-        <h2>Detection an image</h2>
+        <h1>Detection an image</h1>
         <a href="/detect_url?imageurl=http://c.hiphotos.baidu.com/image/w%3D230/sign=f8572f44362ac65c67056170cbf3b21d/e4dde71190ef76c6653f080f9e16fdfaaf516721.jpg">Click for a Quick Example</a>
       </div>
 
@@ -126,9 +135,9 @@
                   {% for single_pred in result[1] %}
                   <li class="list-group-item">
                   <span class="badge">{{ single_pred[1] }}</span>
-                  <h4 class="list-group-item-heading">
+                  <h3 class="list-group-item-heading">
 			  <a href="https://www.google.com/#q={{ single_pred[0] }}" id="prediction_{{ single_pred[2] }}" target="_blank">{{ single_pred[0] }}</a>
-                  </h4>
+                  </h3>
 		  <script>
 			function drawBox(){
 				var ymin = height * {{ single_pred[3] }};
@@ -156,9 +165,9 @@
                   {% for single_pred in result[2] %}
                   <li class="list-group-item">
                   <span class="badge">{{ single_pred[1] }}</span>
-                  <h4 class="list-group-item-heading">
+                  <h3 class="list-group-item-heading">
 			  <a href="https://www.google.com/#q={{ single_pred[0] }}" id="prediction_{{ single_pred[2] }}" target="_blank">{{ single_pred[0] }}</a>
-                  </h4>
+                  </h3>
 		  <script>
 			function drawBox(){
 				var ymin = height * {{ single_pred[3] }};
@@ -185,7 +194,7 @@
 
         </div>
       </div>
-      <p> CNN took {{ result[3] }} seconds. </p>
+      <p class="spendtime"> Total took {{ result[3] }} seconds. </p>
       {% endif %}
       <hr>
       {% endif %}

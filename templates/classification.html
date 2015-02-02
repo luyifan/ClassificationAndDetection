@@ -40,6 +40,15 @@
 	.navbar{
 		margin-bottom:0px;
 	}
+	.badge{
+		font-size:20px;
+	}
+	.nav-tabs{
+		font-size:20px;
+	}
+	p{
+		font-size:20px;
+	}
     </style>
 
     <!--
@@ -93,7 +102,7 @@
     </div>
     <div class="container">
       <div>
-        <h2>Classification a image</h2>
+        <h1>Classification a image</h1>
         <a href="/classify_url?imageurl=http://pic3.zhongsou.com/image/380710317cdddeb894b.jpg">Click for a Quick Example</a>
       </div>
 
@@ -126,9 +135,9 @@
                   {% for single_pred in result[2] %}
 		  <li class="list-group-item">
                   <span class="badge">{{ single_pred[1] }}</span>
-                  <h4 class="list-group-item-heading">
+                  <h3 class="list-group-item-heading">
 			  <a href="https://www.google.com/#q={{ single_pred[0] }}" target="_blank">{{ single_pred[0] }}</a>
-                  </h4>
+                  </h3>
                   </li>
                   {% endfor %}
                 </ul>
@@ -139,9 +148,9 @@
                   {% for single_pred in result[1] %}
 		  <li class="list-group-item">
                   <span class="badge">{{ single_pred[1] }}</span>
-                  <h4 class="list-group-item-heading">
+                  <h3 class="list-group-item-heading">
                     <a href="https://www.google.com/#q={{ single_pred[0] }}" target="_blank">{{ single_pred[0] }}</a>
-                  </h4>
+                  </h3>
                   </li>
                   {% endfor %}
                 </ul>
