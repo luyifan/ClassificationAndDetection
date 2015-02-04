@@ -17,6 +17,7 @@ import caffe
 import exifutil
 import skimage.io
 import cv2
+import random
 from sklearn import cluster
 import itertools
 from bing import Bing
@@ -25,6 +26,8 @@ from bing import Boxes
 PROJECT_DIRNAME = os.path.abspath(os.path.dirname(__file__))
 IMAGE_PREFIX = "/static/temp/"
 UPLOAD_FOLDER = PROJECT_DIRNAME + IMAGE_PREFIX
+RANDOM_CLASSIFICATION = PROJECT_DIRNAME + "/static/img/classification"
+RANDOM_DETECTION = PROJECT_DIRNAME + "/static/img/detection"
 
 ALLOWED_IMAGE_EXTENSIONS = set(['png', 'bmp', 'jpg', 'jpe', 'jpeg', 'gif'])
 COORD_COLS = ['ymin', 'xmin', 'ymax', 'xmax']
@@ -104,7 +107,26 @@ def detect_url():
             imagesrc=embed_image_html(image)
             #imagesrc=IMAGE_PREFIX+filename_)
             )
-
+@app.route('/detect_random')
+def detect_random():
+    index = random.randint(0,len(app.random_detection_list)-1)
+    filename = os.path.join(RANDOM_DETECTION,app.random_detection_list[index])
+    result = app.det.detect_image(str(filename))
+    image = exifutil.open_oriented_im(filename)
+    return flask.render_template(
+            'detection.html' , has_result=True, result=result ,
+            imagesrc=embed_image_html(image)
+            )
+@app.route('/classify_random')
+def classify_random():
+    index = random.randint(0,len(app.random_classification_list)-1)
+    filename = os.path.join(RANDOM_CLASSIFICATION,app.random_classification_list[index])
+    image = exifutil.open_oriented_im(filename)
+    result = app.clf.classify_image(image)
+    return flask.render_template(
+            'classification.html', has_result=True , result = result ,
+            imagesrc=embed_image_html(image)
+            )
 @app.route('/classify_upload', methods=['POST'])
 def classify_upload():
     try:
@@ -549,6 +571,8 @@ def start_from_terminal(app):
     app.clf = ImagenetClassifier(**ImagenetClassifier.default_args)
     # Initialize detection
     app.det = ImagenetDetection(**ImagenetDetection.default_args)
+    app.random_detection_list = os.listdir(RANDOM_DETECTION)
+    app.random_classification_list = os.listdir(RANDOM_CLASSIFICATION)
     if opts.debug:
 	app.run(debug=True, host='10.214.34.104', port=opts.port)
     else:
