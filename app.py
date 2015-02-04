@@ -399,12 +399,17 @@ class ImagenetDetection(object):
             dets_len = len(ind) 
             threshold = -0.2
             count = 0
+            ok = False
             for i in ind:
                 if dets[i,0]>=threshold:
                     ind_one = ind[:count]
                     ind_two = ind[count:]
+                    ok=True
                     break
                 count+=1
+            if ok == False:
+                ind_one = ind[:]
+                ind_two = []
                 
             #pick=ind[:].tolist()[::-1]
             #return dets[pick,:]
