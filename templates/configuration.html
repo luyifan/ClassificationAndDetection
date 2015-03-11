@@ -4,16 +4,30 @@
     <meta charset="utf-8">
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="{{ url_for('static',filename='css/slider.css')}}">
     <script type="text/javascript" src="//code.jquery.com/jquery-2.1.1.js"></script>
     <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="{{ url_for('static',filename='js/d3.min.js')}}"></script>
+    <script type="text/javascript" src="{{ url_for('static',filename='js/bootstrap-slider.js')}}"></script>
     <title>Image Classification And Detection</title>
 
 
     <style type="text/css">
 	div#centerDiv {
-		width: 600px;
 		text-align: center;
+	}
+	span#current_value{
+		font-size:14px;
+		width: 200px;
+		text-align: right;
+		display: inline-block;
+	}
+	span .current_num{
+		color: green;
+		font-size: large;
+	}
+	.pull-right {
+		  float: right !important;
 	}
 	div#hidden{
 		display: none;
@@ -22,8 +36,14 @@
 	{
 		    display: none;
 	}
+	.btn-lg{
+		font-size:25px;
+	}
 	.navbar{
 		margin-bottom:0px;
+	}
+	.tooltip-inner{
+		max-width: 1000px;
 	}
 	.badge{
 		font-size:20px;
@@ -33,6 +53,40 @@
 	}
 	p{
 		font-size:20px;
+	}
+	#cluster_num {
+	      	width: 150%;
+	}
+	#top_k_1 {
+	      	width: 150%;
+	}
+	#max_ratio_1{
+		width: 150%;
+	}
+	#min_size_pixel_1{
+		width: 150%
+	}
+	#min_size_percent_1{
+		width: 150%
+	}
+	#cluster_number .slider-selection{
+		background: #BABABA;
+	}
+	#max_ratio_2 .slider-selection{
+		background: #BABABA;
+	}
+	#top_k_2 .slider-selection{
+		background: #BABABA;
+	}
+	#min_size_pixel_2 .slider-selection{
+		background: #BABABA;
+	}
+	#min_size_percent_2 .slider-selection{
+		background: #BABABA;
+	}
+	input{
+		float: center;
+		clear: both;
 	}
     </style>
 
@@ -58,6 +112,8 @@
 				    <li class="active"><a href="/">Home</a></li>
 				    <li><a href="/classification">Classification</a></li>
 				    <li><a href="/detection">Detection</a></li>
+				    <li><a href="/configuration">Configuration</a></li>
+
 			    </ul>
 		    </div><!-- /.navbar-collapse -->
 	    </div><!-- /.container-fluid -->
@@ -70,21 +126,106 @@
     </div>
     <div class="container">
       <div>
-        <h1>Classify an image</h1>
-        <a href="/classify_random">Click to choose one random example</a>
+        <h1>Configuration of parameters</h1>
       </div>
-      <form role="form" action="classify_url" method="get">
+      <form role="form" action="configure_parameter" method="get">
 	      <div class="form-group">
-		      <div class="input-group">
-			      <input type="text" class="form-control" name="imageurl" id="imageurl" placeholder="Provide an image URL">
-			      <span class="input-group-btn">
-			   	      <input class="btn btn-danger" value="Classify URL" type="submit" id="classifyurl"></input>
-			      </span>
-		      </div><!-- /input-group -->
-	      </div>
+		      <!--<div class="input-group">!-->
+			      <div class="well">
+				      <h3>The cluster number of SpectralClustering:
+					      <div class="pull-right"> 
+						      <input type="text" data-slider-min="1" data-slider-max="100" data-slider-step="1"  data-slider-value="10" data-slider-id="cluster_number" id="cluster_num">
+						      <span id="current_value">Cluster Number: <span id="clusterNumber_Val" class="current_num">10</span></span>
+					      </div>
+				      </h3>
+				      <h3>Top K boxes in  each cluster:
+					      
+					      <div class="pull-right"> 
+						      <input type="text" data-slider-min="1" data-slider-max="100" data-slider-step="1"  data-slider-value="10" data-slider-id="top_k_2" id="top_k_1">
+
+						      <span id="current_value">Top K Value: <span id="topK_Val" class="current_num">10</span></span>
+					      </div>
+				      </h3>
+				      <h3>Max ratio of height and width:
+					      <div class="pull-right"> 
+						      <input type="text" data-slider-min="1" data-slider-max="20" data-slider-step="0.1"  data-slider-value="4" data-slider-id="max_ratio_2" id="max_ratio_1">
+					             <span id="current_value">Max Ratio Value: <span id="maxRatio_Val" class="current_num">4</span></span>
+					      </div>
+				      </h3>
+				      <h3>Min size of detected box by the square of pixel:
+					      <div class="pull-right">
+						      <input type="text" data-slider-min="1" data-slider-max="1000" data-slider-step="1" data-slider-value="100" data-slider-id="min_size_pixel_2" id="min_size_pixel_1">
+						      <span id="current_value">Min Size Pixel: <span id="minSizePixel_Val" class="current_num">100</span></span>
+				      </div>
+				      </h3>
+				      <h3>Min size of detected box by the percent:
+					      <div class="pull-right">
+						      <input type="text" data-slider-min="1" data-slider-max="100" data-slider-step="1" data-slider-value="100" data-slider-id="min_size_percent_2" id="min_size_percent_1">
+						      <span id="current_value">Min Size Percent: <span id="minSizePercent_Val" class="current_num">100%</span></span>
+					      </div>
+				      </h3>
+
+			      </div>
+
+			      <input type="hidden" name="cluster_num_val"  id="cluster_num_val"  value="10"> 
+			      <input type="hidden" name="top_k_in_cluster_val"  id="top_k_in_cluster_val"  value="10">
+			      <input type="hidden" name="max_ratio_val" id="max_ratio_val" value="4">
+			      <input type="hidden" name="min_size_pixel_val" id="min_size_pixel_val" value="100">
+			      <input type="hidden" name="min_size_percent_val" id="min_size_percent_val" value="100">
+			      <div id="centerDiv"><input class="btn btn-danger btn-lg" value="Configure Parameters" type="submit" id="configure parameters"></input>
+		      </div>
+	     </div>
       </form>
      </div>
-   
+     <script>
+	$('#cluster_num').slider({
+		          formater: function(value) {
+		            return 'Current value of cluster number: '+value;
+			    }
+			  });
+         $('#cluster_num').on('slide',function (slideEvt) {
+			 document.getElementById("cluster_num_val").value = slideEvt.value;
+			 $("#clusterNumber_Val").text(slideEvt.value);
+			 });
+
+	$('#top_k_1').slider({
+			formater: function(value) {
+			 return 'Current value of top k in each cluster:' + value;
+			}	
+		});
+        $('#top_k_1').on('slide',function (slideEvt) {
+			document.getElementById("top_k_in_cluster_val").value = slideEvt.value;
+			$("#topK_Val").text(slideEvt.value);
+			});
+        $('#max_ratio_1').slider({
+			formater: function(value) {
+			 return 'Current value of max ratio between height and width:' + value; 
+			 }
+		});
+        $('#max_ratio_1').on('slide',function (slideEvt) {
+			document.getElementById("max_ratio_val").value = slideEvt.value;
+			$("#maxRatio_Val").text(slideEvt.value);
+			});
+        $('#min_size_pixel_1').slider({
+			formater: function(value){
+			return 'Current value of min size with pixel:' + value;
+				}
+			});
+	$('#min_size_pixel_1').on('slide',function (slideEvt) {
+			document.getElementById("min_size_pixel_val").value = slideEvt.value;
+			$("#minSizePixel_Val").text(slideEvt.value);
+			});
+        $('#min_size_percent_1').slider({
+			formater: function(value){
+			return 'Current value of min size with percent:' + value + "%";
+				}
+			});
+	$('#min_size_percent_1').on('slide',function (slideEvt) {
+			document.getElementById("min_size_percent_val").value = slideEvt.value;
+			$("#minSizePercent_Val").text(slideEvt.value+"%");
+     			});
+     </script>
+
    
    <footer class="footer" style="margin-top: 10px;border-top-width: 50px;padding-top: 300px;">
        <hr>	

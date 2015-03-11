@@ -47,7 +47,9 @@ def detection():
 @app.route('/configuration')
 def configuration():
     return flask.render_template('configuration.html')
-
+@app.route('/configure_parameter')
+def configure_parameter():
+    return flask.render_template('index.html',has_result=False)
 @app.route('/classification')
 def classification():
     return flask.render_template('classification.html',has_result=False)
