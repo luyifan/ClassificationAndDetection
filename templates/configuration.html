@@ -134,44 +134,44 @@
 			      <div class="well">
 				      <h3>The cluster number of SpectralClustering:
 					      <div class="pull-right"> 
-						      <input type="text" data-slider-min="1" data-slider-max="100" data-slider-step="1"  data-slider-value="10" data-slider-id="cluster_number" id="cluster_num">
-						      <span id="current_value">Cluster Number: <span id="clusterNumber_Val" class="current_num">10</span></span>
+						      <input type="text" data-slider-min="1" data-slider-max="100" data-slider-step="1"  data-slider-value="{{ origin_parameter[0] }}" data-slider-id="cluster_number" id="cluster_num">
+						      <span id="current_value">Cluster Number: <span id="clusterNumber_Val" class="current_num">{{ origin_parameter[0] }}</span></span>
 					      </div>
 				      </h3>
 				      <h3>Top K boxes in  each cluster:
 					      
 					      <div class="pull-right"> 
-						      <input type="text" data-slider-min="1" data-slider-max="100" data-slider-step="1"  data-slider-value="10" data-slider-id="top_k_2" id="top_k_1">
+						      <input type="text" data-slider-min="1" data-slider-max="100" data-slider-step="1"  data-slider-value="{{ origin_parameter[1] }}" data-slider-id="top_k_2" id="top_k_1">
 
-						      <span id="current_value">Top K Value: <span id="topK_Val" class="current_num">10</span></span>
+						      <span id="current_value">Top K Value: <span id="topK_Val" class="current_num">{{ origin_parameter[1] }}</span></span>
 					      </div>
 				      </h3>
 				      <h3>Max ratio of height and width:
 					      <div class="pull-right"> 
-						      <input type="text" data-slider-min="1" data-slider-max="20" data-slider-step="0.1"  data-slider-value="4" data-slider-id="max_ratio_2" id="max_ratio_1">
-					             <span id="current_value">Max Ratio Value: <span id="maxRatio_Val" class="current_num">4</span></span>
+						      <input type="text" data-slider-min="1" data-slider-max="20" data-slider-step="1"  data-slider-value="{{ origin_parameter[2] }}" data-slider-id="max_ratio_2" id="max_ratio_1">
+						      <span id="current_value">Max Ratio Value: <span id="maxRatio_Val" class="current_num">{{ origin_parameter[2] }}</span></span>
 					      </div>
 				      </h3>
 				      <h3>Min size of detected box by the square of pixel:
 					      <div class="pull-right">
-						      <input type="text" data-slider-min="1" data-slider-max="1000" data-slider-step="1" data-slider-value="100" data-slider-id="min_size_pixel_2" id="min_size_pixel_1">
-						      <span id="current_value">Min Size Pixel: <span id="minSizePixel_Val" class="current_num">100</span></span>
+						      <input type="text" data-slider-min="1" data-slider-max="1000" data-slider-step="1" data-slider-value="{{ origin_parameter[3] }}" data-slider-id="min_size_pixel_2" id="min_size_pixel_1">
+						      <span id="current_value">Min Size Pixel: <span id="minSizePixel_Val" class="current_num">{{ origin_parameter[3] }}</span></span>
 				      </div>
 				      </h3>
 				      <h3>Min size of detected box by the percent:
 					      <div class="pull-right">
-						      <input type="text" data-slider-min="1" data-slider-max="100" data-slider-step="1" data-slider-value="100" data-slider-id="min_size_percent_2" id="min_size_percent_1">
-						      <span id="current_value">Min Size Percent: <span id="minSizePercent_Val" class="current_num">100%</span></span>
+						      <input type="text" data-slider-min="1" data-slider-max="100" data-slider-step="1" data-slider-value="{{ origin_parameter[4] }}" data-slider-id="min_size_percent_2" id="min_size_percent_1">
+						      <span id="current_value">Min Size Percent: <span id="minSizePercent_Val" class="current_num">{{ origin_parameter[4] }}%</span></span>
 					      </div>
 				      </h3>
 
 			      </div>
 
-			      <input type="hidden" name="cluster_num_val"  id="cluster_num_val"  value="10"> 
-			      <input type="hidden" name="top_k_in_cluster_val"  id="top_k_in_cluster_val"  value="10">
-			      <input type="hidden" name="max_ratio_val" id="max_ratio_val" value="4">
-			      <input type="hidden" name="min_size_pixel_val" id="min_size_pixel_val" value="100">
-			      <input type="hidden" name="min_size_percent_val" id="min_size_percent_val" value="100">
+			      <input type="hidden" name="cluster_num_val"  id="cluster_num_val"  value="{{ origin_parameter[0] }}"> 
+			      <input type="hidden" name="top_k_in_cluster_val"  id="top_k_in_cluster_val"  value="{{ origin_parameter[1] }}">
+			      <input type="hidden" name="max_ratio_val" id="max_ratio_val" value="{{ origin_parameter[2] }}">
+			      <input type="hidden" name="min_size_pixel_val" id="min_size_pixel_val" value="{{ origin_parameter[3] }}">
+			      <input type="hidden" name="min_size_percent_val" id="min_size_percent_val" value="{{ origin_parameter[4] }}">
 			      <div id="centerDiv"><input class="btn btn-danger btn-lg" value="Configure Parameters" type="submit" id="configure parameters"></input>
 		      </div>
 	     </div>

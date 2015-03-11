@@ -46,9 +46,17 @@ def detection():
     return flask.render_template('detection.html',has_result=False)
 @app.route('/configuration')
 def configuration():
-    return flask.render_template('configuration.html')
+    origin_parameter=app.det.get_configuration_parameter()
+    return flask.render_template('configuration.html',origin_parameter=origin_parameter)
 @app.route('/configure_parameter')
 def configure_parameter():
+    cluster_num_val = int(flask.request.args.get('cluster_num_val',''))
+    top_k_in_cluster_val = int(flask.request.args.get('top_k_in_cluster_val',''))
+    max_ratio_val = int(flask.request.args.get('max_ratio_val',''))
+    min_size_pixel_val = int(flask.request.args.get('min_size_pixel_val',''))
+    min_size_percent_val = int(flask.request.args.get('min_size_percent_val',''))
+    app.det.set_configuration_parameter(cluster_num_val,top_k_in_cluster_val,max_ratio_val,
+            min_size_pixel_val,min_size_percent_val)
     return flask.render_template('index.html',has_result=False)
 @app.route('/classification')
 def classification():
@@ -347,9 +355,21 @@ class ImagenetDetection(object):
         default_args['top_k_in_cluster'] = 10
         default_args['max_ratio'] = 4
         default_args['min_size'] = 100
+        default_args['min_size_percent']=100
+        def get_configuration_parameter(self):
+            return (self.cluster_num , self.top_k_in_cluster , self.max_ratio ,
+                    self.min_size , self.min_size_percent)
+        def set_configuration_parameter(self,cluster_num,top_k_in_cluster,
+                max_ratio,min_size,min_size_percent):
+            self.cluster_num = cluster_num 
+            self.top_k_in_cluster = top_k_in_cluster
+            self.max_ratio = max_ratio
+            self.min_size = min_size
+            self.min_size_percent = min_size_percent
+            self.spectral = cluster.SpectralClustering(n_clusters=cluster_num,affinity='precomputed')
         def __init__(self,model_def_file, pretrained_model_file , mean_file , class_labels_file , bing_model , gpu_mode , raw_scale ,
                 image_dim , channel_swap , context_pad , 
-                cluster_num , top_k_in_cluster ,  max_ratio , min_size ,
+                cluster_num , top_k_in_cluster ,  max_ratio , min_size , min_size_percent ,
                 input_scale = None ):
 		logging.info('Loading net and associated files...')
                 mean , channel = None , None 
@@ -379,6 +399,7 @@ class ImagenetDetection(object):
                 self.top_k_in_cluster = top_k_in_cluster
                 self.max_ratio = max_ratio
                 self.min_size = min_size
+                self.min_size_percent = min_size_percent
                 self.spectral = cluster.SpectralClustering(n_clusters=cluster_num,affinity='precomputed')
         def removeIOUandOverlap(self,i,index,x1,y1,x2,y2,area,iou,overlap):
             xx1 = np.maximum(x1[i],x1[index])
