@@ -50,6 +50,7 @@ def configuration():
     return flask.render_template('configuration.html',origin_parameter=origin_parameter)
 @app.route('/configure_parameter')
 def configure_parameter():
+    origin_parameter=app.det.get_configuration_parameter()
     cluster_num_val = int(flask.request.args.get('cluster_num_val',''))
     top_k_in_cluster_val = int(flask.request.args.get('top_k_in_cluster_val',''))
     max_ratio_val = int(flask.request.args.get('max_ratio_val',''))
@@ -57,7 +58,8 @@ def configure_parameter():
     min_size_percent_val = int(flask.request.args.get('min_size_percent_val',''))
     app.det.set_configuration_parameter(cluster_num_val,top_k_in_cluster_val,max_ratio_val,
             min_size_pixel_val,min_size_percent_val)
-    return flask.render_template('index.html',has_result=False)
+    updated_parameter=app.det.get_configuration_parameter()
+    return flask.render_template('configuration_work.html',origin_parameter=origin_parameter,updated_parameter=updated_parameter)
 @app.route('/classification')
 def classification():
     return flask.render_template('classification.html',has_result=False)
@@ -361,12 +363,17 @@ class ImagenetDetection(object):
                     self.min_size , self.min_size_percent)
         def set_configuration_parameter(self,cluster_num,top_k_in_cluster,
                 max_ratio,min_size,min_size_percent):
+            logging.info("Cluster Number change from {:} to {:}".format(self.cluster_num,cluster_num)) 
             self.cluster_num = cluster_num 
+            logging.info("Top K in cluster change from {:} to {:}".format(self.top_k_in_cluster,top_k_in_cluster)) 
             self.top_k_in_cluster = top_k_in_cluster
+            logging.info("Max Ratio between width and height change from {:} to {:}".format(self.max_ratio,max_ratio))
             self.max_ratio = max_ratio
+            logging.info("Min Size of the square of pixel change from {:} to {:}".format(self.min_size,min_size))
             self.min_size = min_size
+            logging.info("Min Size Percent change from {:} to {:}".format(self.min_size_percent,min_size_percent))
             self.min_size_percent = min_size_percent
-            self.spectral = cluster.SpectralClustering(n_clusters=cluster_num,affinity='precomputed')
+            self.spectral = cluster.SpectralClustering(n_clusters=cluster_num,affinity='precomputed') 
         def __init__(self,model_def_file, pretrained_model_file , mean_file , class_labels_file , bing_model , gpu_mode , raw_scale ,
                 image_dim , channel_swap , context_pad , 
                 cluster_num , top_k_in_cluster ,  max_ratio , min_size , min_size_percent ,

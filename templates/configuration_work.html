@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="{{ url_for('static',filename='css/bootstrap-arrows.css')}}" data-angle='stylesheet' type='text/css' />
+    <script type="text/javascript" src="//code.jquery.com/jquery-2.1.1.js"></script>
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="{{ url_for('static',filename='js/bootstrap-arrows.js')}}"></script> 
+    <title>Image Classification And Detection</title>
+
+
+    <style type="text/css">
+	h3#countTime{
+		text-align:center;
+	}
+	div#centerDiv {
+		text-align: center;
+	}
+	span.origin_num{
+		color: green;
+		vertical-align:middle;
+		font-size:40px;
+	}
+	span#jumpTo{
+		color: red;
+	}
+	span.current_num{
+		color: red;
+		vertical-align:middle;
+		font-size:40px;
+	}
+	.pull-right {
+		  float: right !important;
+	}
+	div#hidden{
+		display: none;
+	}
+	.btn-lg{
+		font-size:25px;
+	}
+	.navbar{
+		margin-bottom:0px;
+	}
+	.tooltip-inner{
+		max-width: 1000px;
+	}
+	.badge{
+		font-size:20px;
+	}
+	.nav-tabs{
+		font-size:20px;
+	}
+	p{
+		font-size:20px;
+	}
+	.arrow, [class^="arrow-"]{
+		vertical-align: middle;
+		transform: rotate(90deg);
+	}
+    </style>
+
+  </head>
+
+  <body>
+    <!-- Begin page content -->
+    <nav class="navbar navbar-inverse">
+	    <div class="container-fluid">
+		    <!-- Brand and toggle get grouped for better mobile display -->
+		    <div class="navbar-header">
+			    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-9" aria-expanded="false">	
+				    <span class="sr-only">Toggle navigation</span>
+				    <span class="icon-bar"></span>
+				    <span class="icon-bar"></span>
+				    <span class="icon-bar"></span>
+			    </button>
+			    <a class="navbar-brand" href="/">Image Classification And Detection</a>
+		    </div>
+		    <!-- Collect the nav links, forms, and other content for toggling -->
+		    <div class="navbar-collapse collapse" id="bs-example-navbar-collapse-9" aria-expanded="false" style="height: 1px;">
+			    <ul class="nav navbar-nav">
+				    <li class="active"><a href="/">Home</a></li>
+				    <li><a href="/classification">Classification</a></li>
+				    <li><a href="/detection">Detection</a></li>
+				    <li><a href="/configuration">Configuration</a></li>
+
+			    </ul>
+		    </div><!-- /.navbar-collapse -->
+	    </div><!-- /.container-fluid -->
+    </nav>      
+    <div class="jumbotron masthead">
+	    <div class="container">
+		    <h1>Image Classification And Detection</h1>
+		    <h2 align="center">Based on Deep Learning</h2>
+	    </div>
+    </div>
+    <div class="container">
+      <div>
+        <h1>Configuration of parameters</h1>
+     
+      </div>
+      <div class="well">
+	      <div>
+		      <h3>The cluster number of SpectralClustering:
+			      <span class="origin_num">{{ origin_parameter[0] }}</span>
+			      &nbsp;&nbsp;&nbsp;
+			      <span class='arrow-primary-large' data-angle='90'></span>		
+			      &nbsp;&nbsp;&nbsp;
+			      <span class="current_num">{{ updated_parameter[0] }}</span>
+		      </h3>
+		      <h3>Top K boxes in  each cluster:
+			      <span class="origin_num">{{ origin_parameter[1] }}</span>
+			      &nbsp;&nbsp;&nbsp;
+			      <span class='arrow-primary-large' data-angle='90'></span>		
+			      &nbsp;&nbsp;&nbsp;
+			      <span class="current_num">{{ updated_parameter[1] }}</span>
+		      </h3>
+		      <h3>Max ratio of height and width:
+			      <span class="origin_num">{{ origin_parameter[2] }}</span>
+			      &nbsp;&nbsp;&nbsp;
+			      <span class='arrow-primary-large' data-angle='90'></span>		
+			      &nbsp;&nbsp;&nbsp;
+			      <span class="current_num">{{ updated_parameter[2] }}</span>
+		      </h3>
+		      <h3>Min size of detected box by the square of pixel:
+			      <span class="origin_num">{{ origin_parameter[3] }}</span>
+			      &nbsp;&nbsp;&nbsp;
+			      <span class='arrow-primary-large' data-angle='90'></span>		
+			      &nbsp;&nbsp;&nbsp;
+			      <span class="current_num">{{ updated_parameter[3] }}</span>
+		      </h3>
+		      <h3>Min size of detected box by the percent:
+			      <span class="origin_num">{{ origin_parameter[4] }}</span>
+			      &nbsp;&nbsp;&nbsp;
+			      <span class='arrow-primary-large' data-angle='90'></span>		
+			      &nbsp;&nbsp;&nbsp;
+			      <span class="current_num">{{ updated_parameter[4] }}</span>
+		      </h3>
+	      </div>
+      </div>
+      <script type="text/javascript">     
+		function countDown(secs,surl){     
+			var jumpTo = document.getElementById('jumpTo');
+			jumpTo.innerHTML=secs;  
+			if(--secs>0){     
+				setTimeout("countDown("+secs+",'"+surl+"')",1000);     
+			}     
+			else{       
+			       	location.href=surl;     
+		       	}     
+		}
+      </script> 
+      <h3 id="countTime"><span id="jumpTo">10</span> second jump to configuration page</h3>
+      <script type="text/javascript">countDown(10,'http://10.214.34.104:5000/configuration');</script>  
+
+      <footer class="footer" style="margin-top: 10px;border-top-width: 50px;padding-top: 300px;">
+       <hr>	
+       <div class="container" id="centerDiv">
+        <ul class="bs-docs-footer-links text-muted list-inline" >
+          <li>Currently v1.0.0</li>
+          <li>·</li>
+          <li><a href="https://github.com/luyifan">GitHub</a></li>
+          <li>·</li>
+          <li><a href="#">About</a></li>
+          <li>·</li>
+          <li><a href="#">Blog</a></li>
+          <li>·</li>
+          <li>
+              <span class="glyphicon glyphicon-copyright-mark" aria-hidden="true">&nbsp;鲁懿帆</span>
+          </li>
+          <li><span class="glyphicon glyphicon-thumbs-up" aria-hidden="true">&nbsp;指导老师：王东辉</span>
+          </li>
+
+        </ul>
+      </div>
+     </footer>
+ </body>
+</html>
