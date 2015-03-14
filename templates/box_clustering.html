@@ -8,13 +8,11 @@
     <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="{{ url_for('static',filename='js/d3.min.js')}}"></script>
     <title>Image Classification And Detection</title>
-
-
     <!-- Script to instantly classify an image once it is uploaded. -->
     <script type="text/javascript">
       $(document).ready(
         function(){
-          $('#classifyfile').attr('disabled',true);
+          $('#detectfile').attr('disabled',true);
           $('#imagefile').change(
             function(){
               if ($(this).val()){
@@ -26,13 +24,14 @@
       );
     </script>
     <style type="text/css">
-	div#centerDiv {
+    	div#centerDiv {
 		width: 600px;
 		text-align: center;
 	}
 	div#hidden{
-		display: none;
+		display:none;
 	}
+
 	#image-upload > input
 	{
 		    display: none;
@@ -43,7 +42,7 @@
 	.badge{
 		font-size:20px;
 	}
-	.nav-tabs{
+	.nav-tabs {
 		font-size:20px;
 	}
 	p{
@@ -67,11 +66,10 @@
     }
     </style>
     !-->
-
   </head>
 
   <body>
-    <!-- Begin page content -->
+    
     <nav class="navbar navbar-inverse">
 	    <div class="container-fluid">
 		    <!-- Brand and toggle get grouped for better mobile display -->
@@ -96,16 +94,19 @@
 		    </div><!-- /.navbar-collapse -->
 	    </div><!-- /.container-fluid -->
     </nav>      
+    <!-- Begin page content -->
     <div class="jumbotron masthead">
 	    <div class="container">
 		    <h1>Image Classification And Detection</h1>
 		    <h2 align="center">Based on Deep Learning</h2>
 	    </div>
     </div>
+
     <div class="container">
+
       <div>
-        <h1>Classify an image</h1>
-        <a href="/classify_random">Click to choose one random example</a>
+        <h1>Cluster boxes of an image</h1>
+        <a href="/cluster_random">Click to choose one random example</a>
       </div>
 
       {% if has_result %}
@@ -114,45 +115,78 @@
       <div class="alert alert-danger">{{ result[1] }} Did you provide a valid URL or a valid image file? </div>
       {% else %}
       <div class="media">
-	<a class="pull-left" id="origin"></a>
-	
-    	<script>
+        <a class="pull-left" href="#" id="origin"></a>
+	<script>
 		var height = 300;
 		var width = 300;
 		var svg = d3.select("#origin").append("svg").attr("width",width).attr("height",height);
-		function draw() {
+		function draw(){
 			svg.append("svg:image").attr("width", width).attr("height",height).attr("xlink:href","{{ imagesrc }} ")
 		}
-		draw(); 
-    	</script>
+		draw();
+	</script>
 	<div class="media-body">
           <div class="bs-example bs-example-tabs">
             <ul id="myTab" class="nav nav-tabs">
-              <li class="active"><a href="#infopred" data-toggle="tab">Accurate Result</a></li>
-              <li><a href="#flatpred" data-toggle="tab"> Specific Result</a></li>
+              <li class="active"><a href="#infopred" data-toggle="tab">Non-maximum Suppression  Result</a></li>
+	      <li><a href="#flatpred" data-toggle="tab">No Suppression Result</a></li>
             </ul>
             <div id="myTabContent" class="tab-content">
               <div class="tab-pane fade in active" id="infopred">
-	        <ul class="list-group">
-                  {% for single_pred in result[2] %}
-		  <li class="list-group-item">
+                <ul class="list-group">
+                  {% for single_pred in result[1] %}
+                  <li class="list-group-item">
                   <span class="badge">{{ single_pred[1] }}</span>
                   <h3 class="list-group-item-heading">
-			  <a href="https://www.google.com/#q={{ single_pred[0] }}" target="_blank">{{ single_pred[0] }}</a>
+			  <a href="https://www.google.com/#q={{ single_pred[0] }}" id="prediction_{{ single_pred[2] }}" target="_blank">{{ single_pred[0] }}</a>
                   </h3>
+		  <script>
+			function drawBox(){
+				var ymin = height * {{ single_pred[3] }};
+				var ylen = height * {{ single_pred[4] }};
+				var xmin = width * {{ single_pred[5] }};
+				var xlen = width * {{ single_pred[6] }};
+				svg.append("svg:rect").attr("id", "box_{{ single_pred[2] }}").attr("x",xmin).attr("y",ymin).attr("width",xlen).attr("height", ylen).style("fill-opacity", 0.2).style("fill","red").style("stroke-width", "5px").style("stroke", "red").style('visibility', 'hidden');
+				var a = d3.select("#prediction_{{ single_pred[2]}}");
+				a.on("mouseover",function(){
+					d3.select("#box_{{ single_pred[2] }}").style('visibility', 'visible');		
+				}).on("mouseout",function(){
+					d3.select("#box_{{ single_pred[2] }}").style('visibility', 'hidden');
+				});
+
+
+			}
+			drawBox();
+		  </script>
                   </li>
                   {% endfor %}
                 </ul>
               </div>
-	      
-	      <div class="tab-pane fade" id="flatpred">
+              <div class="tab-pane fade" id="flatpred"> 
                 <ul class="list-group">
-                  {% for single_pred in result[1] %}
-		  <li class="list-group-item">
+                  {% for single_pred in result[2] %}
+                  <li class="list-group-item">
                   <span class="badge">{{ single_pred[1] }}</span>
                   <h3 class="list-group-item-heading">
-                    <a href="https://www.google.com/#q={{ single_pred[0] }}" target="_blank">{{ single_pred[0] }}</a>
+			  <a href="https://www.google.com/#q={{ single_pred[0] }}" id="prediction_{{ single_pred[2] }}" target="_blank">{{ single_pred[0] }}</a>
                   </h3>
+		  <script>
+			function drawBox(){
+				var ymin = height * {{ single_pred[3] }};
+				var ylen = height * {{ single_pred[4] }};
+				var xmin = width * {{ single_pred[5] }};
+				var xlen = width * {{ single_pred[6] }};
+				svg.append("svg:rect").attr("id", "box_{{ single_pred[2] }}").attr("x",xmin).attr("y",ymin).attr("width",xlen).attr("height", ylen).style("fill-opacity", 0.2).style("fill","red").style("stroke-width", "5px").style("stroke", "red").style('visibility', 'hidden');
+				var a = d3.select("#prediction_{{ single_pred[2]}}");
+				a.on("mouseover",function(){
+					d3.select("#box_{{ single_pred[2] }}").style('visibility', 'visible');		
+				}).on("mouseout",function(){
+					d3.select("#box_{{ single_pred[2] }}").style('visibility', 'hidden');
+	      
+				});
+			}
+			drawBox();
+		  </script>
                   </li>
                   {% endfor %}
                 </ul>
@@ -162,36 +196,35 @@
 
         </div>
       </div>
-      <p> CNN took {{ result[3] }} seconds. </p>
+      <p class="spendtime"> Total took {{ result[3] }} seconds. </p>
       {% endif %}
       <hr>
       {% endif %}
 
-      <form role="form" action="classify_url" method="get">
+      <form role="form" action="cluster_url" method="get">
         <div class="form-group">
           <div class="input-group">
             <input type="text" class="form-control" name="imageurl" id="imageurl" placeholder="Provide an image URL">
             <span class="input-group-btn">
-              <input class="btn btn-danger" value="Classify URL" type="submit" id="classifyurl"></input>
+            <input class="btn btn-danger" value="Cluster Boxes from URL" type="submit" id="clusterurl"></input>
             </span>
           </div><!-- /input-group -->
         </div>
       </form>
-
-      <form id="formupload" class="form-inline" role="form" action="classify_upload" method="post" enctype="multipart/form-data">
+      <form id="formupload" class="form-inline" role="form" action="cluster_upload" method="post" enctype="multipart/form-data">
+        
         <div class="form-group" id="image-upload">
 		<label for="imagefile">Or upload an image:</br><img src="/static/img/upload.png" /></label>
 		<input type="file" name="imagefile" id="imagefile">
         </div>
-        <!--<input type="submit" class="btn btn-primary" value="Classify File" id="classifyfile"></input>-->
+	<!--<input type="submit" class="btn btn-primary" value="Classify File" id="classifyfile"></input>-->
       </form>
     </div>
    </div>
    
-   
-   <footer class="footer" style="margin-top: 10px;border-top-width: 50px;padding-top: 300px;">
-       <hr>	
-       <div class="container" id="centerDiv">
+    <footer class="footer" style="margin-top: 10px;border-top-width: 50px;padding-top: 300px;">
+      <hr>
+      <div class="container" id="centerDiv">
         <ul class="bs-docs-footer-links text-muted list-inline" >
           <li>Currently v1.0.0</li>
           <li>·</li>
@@ -209,6 +242,6 @@
 
         </ul>
       </div>
-     </footer>
+    </footer>
  </body>
 </html>

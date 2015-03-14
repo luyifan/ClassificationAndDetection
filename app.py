@@ -63,6 +63,9 @@ def configure_parameter():
 @app.route('/classification')
 def classification():
     return flask.render_template('classification.html',has_result=False)
+@app.route('/box_clustering')
+def box_clustering():
+    return flask.render_template('box_clustering.html',has_result=False)
 
 @app.route('/classify_url', methods=['GET'])
 def classify_url():
@@ -109,7 +112,6 @@ def detect_url():
                 'detection.html', has_result=True,
                 result=(False,'Cannot open image from URL.')
         )
-    
     logging.info('Image: %s',imageurl)
     filename_ = str(datetime.datetime.now()).replace(' ','_') + \
             imageurl.split('/')[-1]
@@ -122,6 +124,28 @@ def detect_url():
             imagesrc=embed_image_html(image)
             #imagesrc=IMAGE_PREFIX+filename_)
             )
+@app.route('/cluster_url')
+def cluster_url():
+    imageurl = flask.request.args.get('imageurl','')
+    try:
+        string_buffer = StringIO.StringIO(urllib.urlopen(imageurl).read())
+        image = caffe.io.load_image(string_buffer)
+    except Exception as err:
+        logging.info('URL Image open error %s',err)
+        return flask.render_template('box_clustering.html',has_result=True,
+                result=(False,'Cannot open image from URL.')
+                )
+    logging.info('Image: %s', imageurl)
+    filename_ = str(datetime.datetime.now()).replace(' ','_') + \
+            imageurl.split('/')[-1]
+    filename = os.path.join(UPLOAD_FOLDER,filename_)
+    skimage.io.imsave(filename,image)
+    logging.info('Saving to %s',filename)
+    result = app.det.detect_image(str(filename))
+    return flask.render_template(
+            'box_clustering.html',has_result=True,result=result,
+            imagesrc=embed_image_html(image)
+            )
 @app.route('/detect_random')
 def detect_random():
     index = random.randint(0,len(app.random_detection_list)-1)
@@ -130,6 +154,16 @@ def detect_random():
     image = exifutil.open_oriented_im(filename)
     return flask.render_template(
             'detection.html' , has_result=True, result=result ,
+            imagesrc=embed_image_html(image)
+            )
+@app.route('/cluster_random')
+def cluster_random():
+    index = random.randint(0,len(app.random_detection_list)-1)
+    filename = os.path.join(RANDOM_DETECTION,app.random_detection_list[index])
+    result = app.det.detect_image(str(filename))
+    image = exifutil.open_oriented_im(filename)
+    return flask.render_template(
+            'box_clustering.html' , has_result=True, result=result ,
             imagesrc=embed_image_html(image)
             )
 @app.route('/classify_random')
@@ -181,10 +215,10 @@ def detect_upload():
         #image = exifutil.open_oriented_im(filename)
         #logging.info(image)
     except Exception as err:
-        logging.info('Uploaded image open error; %s' , err)
+        logging.info('Uploaded image open error: %s' , err)
         return flask.render_template(
                 'detection.html' , has_result=True,
-                result=(False,'Cannot open uploded image.')
+                result=(False,'Cannot open uploaded image.')
         )
     result = app.det.detect_image(str(filename))
     #print result
@@ -193,12 +227,34 @@ def detect_upload():
             'detection.html' , has_result=True,result=result,
             #imagesrc=IMAGE_PREFIX+filename_
             imagesrc=embed_image_html(image)
-    )
+            )
+@app.route('/cluster_upload',methods=['POST'])
+def cluster_upload():
+    try:
+        imagefile = flask.request.files['imagefile']
+        filename_ = str(datetime.datetime.now()).replace(' ','_') + \
+                werkzeug.secure_filename(imagefile.filename)
+        filename = os.path.join(UPLOAD_FOLDER,filename_)
+        imagefile.save(filename)
+        logging.info('Saving to %s.',filename)
+    except Exception as err:
+        logging.info('Uploaded image open error: %s' , err )
+        return flask.render_template(
+                'box_clustering.html' , has_result = True ,
+                result=(False,'Cannot open uploaded image.')
+                )
+    result = app.det.detect_image(str(filename))
+    image = exifutil.open_oriented_im(str(filename))
+    return flask.render_template(
+            'box_clustering.html', has_result = True , result = result,
+            imagesrc=embed_image_html(image)
+            )
+
 @app.route('/detect_local',methods=['GET'])
 def detect_local():
     filename_=flask.request.args.get('imagefilename','')
     if not allowed_file(filename_):
-        logging.info('Detect Local Image Error, not a image file')
+        logging.info('Detect Local Image Error, not an image file')
         return flask.render_template('detection.html',has_result=True,
                 result=(False,'Detect error image')
                 )
@@ -215,12 +271,32 @@ def detect_local():
            #imagesrc="/static/"+filename_
            imagesrc=embed_image_html(image)
     )
+@app.route('/cluster_local',methods=['GET'])
+def cluster_local():
+    filename_ = flask.request.args.get('imagefilename','')
+    if not allowed_file(filename_):
+        logging.info('Cluster Boxes of Local Image Error, not an image file')
+        return flask.render_template('box_clustering.html',has_result=True,
+                result=(False,'Cluster boxes of error image')
+                )
+    imagefilename=PROJECT_DIRNAME+"/static/"+filename_
+    if not os.path.isfile(imagefilename):
+        logging.info('Cluster Boxes of Local Image Error: %s',imagefilename)
+        return flask.render_template('box_clustering.html',has_result=True,
+                result=(False,'Cluster boxes of error image')
+                )
+    result = app.det.detect_image(str(imagefilename))
+    image = exifutil.open_oriented_im(str(imagefilename))
+    return flask.render_template(
+            'box_clustering.html',has_result=True,result=result,
+            imagesrc=embed_image_html(image)
+            )
 
 @app.route('/classify_local',methods=['GET'])
 def classify_local():
     filename_=flask.request.args.get('imagefilename','')
     if not allowed_file(filename_):
-        logging.info('Classify Local Image Error, not a image file')
+        logging.info('Classify Local Image Error, not an image file')
         return flask.render_template('classification.html',has_result=True,
                 result=(False,'Classify error image')
         )
