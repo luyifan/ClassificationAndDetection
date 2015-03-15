@@ -49,27 +49,8 @@
 		font-size:20px;
 	}
     </style>
-
-    <!--
-    <style>
-    body {
-      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-      line-height:1.5em;
-      color: #232323;
-      -webkit-font-smoothing: antialiased;
-    }
-
-    h1, h2, h3 {
-      font-family: Times, serif;
-      line-height:1.5em;
-      border-bottom: 1px solid #ccc;
-    }
-    </style>
-    !-->
   </head>
-
   <body>
-    
     <nav class="navbar navbar-inverse">
 	    <div class="container-fluid">
 		    <!-- Brand and toggle get grouped for better mobile display -->
@@ -103,7 +84,6 @@
     </div>
 
     <div class="container">
-
       <div>
         <h1>Cluster boxes of an image</h1>
         <a href="/cluster_random">Click to choose one random example</a>
@@ -128,64 +108,43 @@
 	<div class="media-body">
           <div class="bs-example bs-example-tabs">
             <ul id="myTab" class="nav nav-tabs">
-              <li class="active"><a href="#infopred" data-toggle="tab">Non-maximum Suppression  Result</a></li>
-	      <li><a href="#flatpred" data-toggle="tab">No Suppression Result</a></li>
+              <li class="active"><a href="#infopred" data-toggle="tab">Box Clustering Result</a></li>
             </ul>
             <div id="myTabContent" class="tab-content">
               <div class="tab-pane fade in active" id="infopred">
                 <ul class="list-group">
-                  {% for single_pred in result[1] %}
+                  {% for each_cluster in result[1] %}
                   <li class="list-group-item">
-                  <span class="badge">{{ single_pred[1] }}</span>
                   <h3 class="list-group-item-heading">
-			  <a href="https://www.google.com/#q={{ single_pred[0] }}" id="prediction_{{ single_pred[2] }}" target="_blank">{{ single_pred[0] }}</a>
+			  <a id="cluster_box_{{each_cluster[0]}}">cluster_box_{{ each_cluster[0] }}</a>
                   </h3>
+			
+		  {% for one_box in each_cluster[1] %}
 		  <script>
-			function drawBox(){
-				var ymin = height * {{ single_pred[3] }};
-				var ylen = height * {{ single_pred[4] }};
-				var xmin = width * {{ single_pred[5] }};
-				var xlen = width * {{ single_pred[6] }};
-				svg.append("svg:rect").attr("id", "box_{{ single_pred[2] }}").attr("x",xmin).attr("y",ymin).attr("width",xlen).attr("height", ylen).style("fill-opacity", 0.2).style("fill","red").style("stroke-width", "5px").style("stroke", "red").style('visibility', 'hidden');
-				var a = d3.select("#prediction_{{ single_pred[2]}}");
-				a.on("mouseover",function(){
-					d3.select("#box_{{ single_pred[2] }}").style('visibility', 'visible');		
-				}).on("mouseout",function(){
-					d3.select("#box_{{ single_pred[2] }}").style('visibility', 'hidden');
-				});
-
-
+			function drawBox (){
+				var ymin = height * {{ one_box[1] }};
+				var ylen = height * {{ one_box[2] }};
+				var xmin = width *  {{ one_box[3] }};
+				var xlen = width *  {{ one_box[4] }};
+				svg.append("svg:rect").attr("id","box_{{ one_box[0] }}").attr("x",xmin).attr("y",ymin).attr("width",xlen).attr("height",ylen).style("stroke-width","2px").style("fill-opacity",0).style("stroke","red").style('visibility','hidden');
 			}
 			drawBox();
 		  </script>
-                  </li>
-                  {% endfor %}
-                </ul>
-              </div>
-              <div class="tab-pane fade" id="flatpred"> 
-                <ul class="list-group">
-                  {% for single_pred in result[2] %}
-                  <li class="list-group-item">
-                  <span class="badge">{{ single_pred[1] }}</span>
-                  <h3 class="list-group-item-heading">
-			  <a href="https://www.google.com/#q={{ single_pred[0] }}" id="prediction_{{ single_pred[2] }}" target="_blank">{{ single_pred[0] }}</a>
-                  </h3>
+		  {% endfor %}
 		  <script>
-			function drawBox(){
-				var ymin = height * {{ single_pred[3] }};
-				var ylen = height * {{ single_pred[4] }};
-				var xmin = width * {{ single_pred[5] }};
-				var xlen = width * {{ single_pred[6] }};
-				svg.append("svg:rect").attr("id", "box_{{ single_pred[2] }}").attr("x",xmin).attr("y",ymin).attr("width",xlen).attr("height", ylen).style("fill-opacity", 0.2).style("fill","red").style("stroke-width", "5px").style("stroke", "red").style('visibility', 'hidden');
-				var a = d3.select("#prediction_{{ single_pred[2]}}");
-				a.on("mouseover",function(){
-					d3.select("#box_{{ single_pred[2] }}").style('visibility', 'visible');		
-				}).on("mouseout",function(){
-					d3.select("#box_{{ single_pred[2] }}").style('visibility', 'hidden');
-	      
-				});
-			}
-			drawBox();
+			var one_cluster_{{ each_cluster[0] }} = {{ each_cluster[2] }};
+			var a_{{ each_cluster[0] }}= d3.select("#cluster_box_{{each_cluster[0]}}");
+			a_{{ each_cluster[0] }}.on("mouseover",function(){
+				for(i=0;i<one_cluster_{{ each_cluster[0] }}.length;i++){
+					//console.log("#box_".concat(one_cluster_{{ each_cluster[0] }}[i]));
+					d3.select("#box_".concat(one_cluster_{{ each_cluster[0] }}[i])).style('visibility', 'visible');
+				}
+			}).on("mouseout",function(){
+				for(i=0;i<one_cluster_{{ each_cluster[0] }}.length;i++){
+					//console.log("#box_".concat(one_cluster_{{ each_cluster[0] }}[i]));
+					d3.select("#box_".concat(one_cluster_{{ each_cluster[0] }}[i])).style('visibility', 'hidden');
+				}
+			});
 		  </script>
                   </li>
                   {% endfor %}
@@ -193,10 +152,9 @@
               </div>
             </div>
           </div>
-
         </div>
       </div>
-      <p class="spendtime"> Total took {{ result[3] }} seconds. </p>
+      <p class="spendtime"> Total took {{ result[2] }} seconds. </p>
       {% endif %}
       <hr>
       {% endif %}

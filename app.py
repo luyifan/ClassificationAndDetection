@@ -141,7 +141,7 @@ def cluster_url():
     filename = os.path.join(UPLOAD_FOLDER,filename_)
     skimage.io.imsave(filename,image)
     logging.info('Saving to %s',filename)
-    result = app.det.detect_image(str(filename))
+    result = app.det.cluster_boxes_of_image(str(filename))
     return flask.render_template(
             'box_clustering.html',has_result=True,result=result,
             imagesrc=embed_image_html(image)
@@ -160,10 +160,10 @@ def detect_random():
 def cluster_random():
     index = random.randint(0,len(app.random_detection_list)-1)
     filename = os.path.join(RANDOM_DETECTION,app.random_detection_list[index])
-    result = app.det.detect_image(str(filename))
+    result = app.det.cluster_boxes_of_image(str(filename))
     image = exifutil.open_oriented_im(filename)
     return flask.render_template(
-            'box_clustering.html' , has_result=True, result=result ,
+            'box_clustering.html' , has_result=True, result=result,
             imagesrc=embed_image_html(image)
             )
 @app.route('/classify_random')
@@ -243,7 +243,7 @@ def cluster_upload():
                 'box_clustering.html' , has_result = True ,
                 result=(False,'Cannot open uploaded image.')
                 )
-    result = app.det.detect_image(str(filename))
+    result = app.det.cluster_boxes_of_image(str(filename))
     image = exifutil.open_oriented_im(str(filename))
     return flask.render_template(
             'box_clustering.html', has_result = True , result = result,
@@ -285,7 +285,7 @@ def cluster_local():
         return flask.render_template('box_clustering.html',has_result=True,
                 result=(False,'Cluster boxes of error image')
                 )
-    result = app.det.detect_image(str(imagefilename))
+    result = app.det.cluster_boxes_of_image(str(imagefilename))
     image = exifutil.open_oriented_im(str(imagefilename))
     return flask.render_template(
             'box_clustering.html',has_result=True,result=result,
@@ -546,8 +546,7 @@ class ImagenetDetection(object):
                 ind_one = ind_one[:-1]
                 ind_one=self.removeIOUandOverlap(i,ind_one,x1,y1,x2,y2,area,iou,overlap)
             return dets[pick,:]
-        
-        def cluster_boxes(self,boxes): 
+        def get_box_of_each_cluster_boxes(self,boxes):
             ymins=np.array([ s for s in boxes.ymins() ]).astype(int)
             ymaxs=np.array([ s for s in boxes.ymaxs() ]).astype(int)
             xmins=np.array([ s for s in boxes.xmins() ]).astype(int)
@@ -572,7 +571,6 @@ class ImagenetDetection(object):
             self.spectral.fit(distances)
             endtimeInBoxes=time.time()
             logging.info("Cluster speend {:.3f}".format(endtimeInBoxes-starttimeInBoxes))
-            starttimeInBoxes=time.time()
             index_dictionary={}
             for i in range(self.cluster_num):
                 index_dictionary[i]=[]
@@ -585,12 +583,12 @@ class ImagenetDetection(object):
                 if len(index_dictionary[label])>=self.top_k_in_cluster:
                     continue
                 index_dictionary[label].append(i)
+            return (index_dictionary,ymins,ymaxs,xmins,xmaxs)
+        def cluster_boxes(self,boxes):  
             index_list=[]
+            (index_dictionary,ymins,ymaxs,xmins,xmaxs) = self.get_box_of_each_cluster_boxes(boxes)
             for key in index_dictionary:
                 index_list.extend(index_dictionary[key])
-            
-            endtimeInBoxes=time.time()
-            logging.info("Cluster get top {} spend {:.3f}".format(self.top_k_in_cluster,endtimeInBoxes-starttimeInBoxes))
             boxes=pd.DataFrame({0:ymins[index_list],1:xmins[index_list],2:ymaxs[index_list],3:xmaxs[index_list].tolist()})
             return boxes
         def detect_image(self,imagefilename):
@@ -651,7 +649,26 @@ class ImagenetDetection(object):
             #print endtime - midtime
             logging.info("Processed {} windows in {:.3f} s.".format(len(detections),endtime-starttime))
             return (True,result,result_all,'%.3f' % (endtime - starttime)) 
-            
+        def cluster_boxes_of_image(self,imagefilename):
+            starttime = time.time()
+            boxes = self.bing_search.getBoxesOfOneImage(imagefilename,130)
+            (index_dictionary,ymins,ymaxs,xmins,xmaxs) = self.get_box_of_each_cluster_boxes(boxes)
+            cluster_list = []
+            print index_dictionary
+            img=cv2.imread(imagefilename)
+            image_size=img.shape[:-1]
+            for index_of_cluster in index_dictionary:
+                each_cluster = []
+                index_in_cluster = []
+                for value in index_dictionary[index_of_cluster]:
+                    each_cluster.append((value,\
+                            ymins[value]*1.0/image_size[0],(ymaxs[value]-ymins[value])*1.0/image_size[0],\
+                            xmins[value]*1.0/image_size[1],(xmaxs[value]-xmins[value])*1.0/image_size[1]))
+                    index_in_cluster.append(value)
+                cluster_list.append((index_of_cluster,each_cluster,index_in_cluster))
+            endtime = time.time()
+            print cluster_list
+            return (True,cluster_list,'%.3f' % (endtime - starttime ))
 def start_tornado(app, port=5000):
     http_server = tornado.httpserver.HTTPServer(
         tornado.wsgi.WSGIContainer(app))
