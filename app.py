@@ -667,7 +667,6 @@ class ImagenetDetection(object):
                     index_in_cluster.append(value)
                 cluster_list.append((index_of_cluster,each_cluster,index_in_cluster))
             endtime = time.time()
-            print cluster_list
             return (True,cluster_list,'%.3f' % (endtime - starttime ))
 def start_tornado(app, port=5000):
     http_server = tornado.httpserver.HTTPServer(
