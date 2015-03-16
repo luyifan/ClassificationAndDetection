@@ -483,6 +483,7 @@ class ImagenetDetection(object):
                 self.max_ratio = max_ratio
                 self.min_size = min_size
                 self.min_size_percent = min_size_percent
+                self.min_pixel_by_min = self.min_size
                 self.spectral = cluster.SpectralClustering(n_clusters=cluster_num,affinity='precomputed')
         def removeIOUandOverlap(self,i,index,x1,y1,x2,y2,area,iou,overlap):
             xx1 = np.maximum(x1[i],x1[index])
@@ -575,7 +576,7 @@ class ImagenetDetection(object):
             for i in range(self.cluster_num):
                 index_dictionary[i]=[]
             for i in range(windows_size):
-                if(area[i]<self.min_size):
+                if(area[i]<self.min_pixel_by_min):
                     continue
                 if(width[i]*1.0/height[i]>self.max_ratio or height[i]*1.0/width[i]>self.max_ratio):
                     continue
@@ -593,6 +594,9 @@ class ImagenetDetection(object):
             return boxes
         def detect_image(self,imagefilename):
             starttime = time.time() 
+            img=cv2.imread(imagefilename)
+            image_size=img.shape[:-1]
+            self.min_pixel_by_min = min(self.min_size,self.min_size_percent*0.01*image_size[0]*image_size[1])
             boxes = self.bing_search.getBoxesOfOneImage(imagefilename,130)
             bing_windows=self.cluster_boxes(boxes)
             #bing_windows=pd.DataFrame({0:ymins,1:xmins,2:ymaxs,3:xmaxs})
@@ -625,8 +629,6 @@ class ImagenetDetection(object):
             max_each=pd.DataFrame(dets)
             max_each=max_each.rename(columns={0:'value',1:'category_id',2:'ymin',3:'xmin',4:'ymax',5:'xmax'})
             print max_each
-            img=cv2.imread(imagefilename)
-            image_size=img.shape[:-1]
             #font=cv2.FONT_ITALIC
             result=[]
             result_all=[]
@@ -652,11 +654,11 @@ class ImagenetDetection(object):
         def cluster_boxes_of_image(self,imagefilename):
             starttime = time.time()
             boxes = self.bing_search.getBoxesOfOneImage(imagefilename,130)
-            (index_dictionary,ymins,ymaxs,xmins,xmaxs) = self.get_box_of_each_cluster_boxes(boxes)
-            cluster_list = []
-            print index_dictionary
             img=cv2.imread(imagefilename)
             image_size=img.shape[:-1]
+            self.min_pixel_by_min = min(self.min_size,self.min_size_percent*0.01*image_size[0]*image_size[1])
+            (index_dictionary,ymins,ymaxs,xmins,xmaxs) = self.get_box_of_each_cluster_boxes(boxes)
+            cluster_list = []
             for index_of_cluster in index_dictionary:
                 each_cluster = []
                 index_in_cluster = []
