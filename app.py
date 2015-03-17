@@ -432,7 +432,7 @@ class ImagenetDetection(object):
         default_args['cluster_num'] = 10
         default_args['top_k_in_cluster'] = 10
         default_args['max_ratio'] = 4
-        default_args['min_size'] = 100
+        default_args['min_size'] = 10
         default_args['min_size_percent']=100
         def get_configuration_parameter(self):
             return (self.cluster_num , self.top_k_in_cluster , self.max_ratio ,
@@ -596,7 +596,7 @@ class ImagenetDetection(object):
             starttime = time.time() 
             img=cv2.imread(imagefilename)
             image_size=img.shape[:-1]
-            self.min_pixel_by_min = min(self.min_size,self.min_size_percent*0.01*image_size[0]*image_size[1])
+            self.min_pixel_by_min = min(self.min_size*self.min_size,self.min_size_percent*0.01*image_size[0]*image_size[1])
             boxes = self.bing_search.getBoxesOfOneImage(imagefilename,130)
             bing_windows=self.cluster_boxes(boxes)
             #bing_windows=pd.DataFrame({0:ymins,1:xmins,2:ymaxs,3:xmaxs})
@@ -656,7 +656,7 @@ class ImagenetDetection(object):
             boxes = self.bing_search.getBoxesOfOneImage(imagefilename,130)
             img=cv2.imread(imagefilename)
             image_size=img.shape[:-1]
-            self.min_pixel_by_min = min(self.min_size,self.min_size_percent*0.01*image_size[0]*image_size[1])
+            self.min_pixel_by_min = min(self.min_size*self.min_size,self.min_size_percent*0.01*image_size[0]*image_size[1])
             (index_dictionary,ymins,ymaxs,xmins,xmaxs) = self.get_box_of_each_cluster_boxes(boxes)
             cluster_list = []
             for index_of_cluster in index_dictionary:

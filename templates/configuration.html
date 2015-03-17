@@ -155,8 +155,8 @@
 				      </h3>
 				      <h3>Min size of detected box by the square of pixel:
 					      <div class="pull-right">
-						      <input type="text" data-slider-min="10" data-slider-max="10000" data-slider-step="10" data-slider-value="{{ origin_parameter[3] }}" data-slider-id="min_size_pixel_2" id="min_size_pixel_1">
-						      <span id="current_value">Min Size Pixel: <span id="minSizePixel_Val" class="current_num">{{ origin_parameter[3] }}</span></span>
+						      <input type="text" data-slider-min="1" data-slider-max="100" data-slider-step="1" data-slider-value="{{ origin_parameter[3] }}" data-slider-id="min_size_pixel_2" id="min_size_pixel_1">
+						      <span id="current_value">Min Size Pixel: <span id="minSizePixel_Val" class="current_num">{{ origin_parameter[3] }}^2</span></span>
 				      </div>
 				      </h3>
 				      <h3>Min size of detected box by the percent:
@@ -209,12 +209,12 @@
 			});
         $('#min_size_pixel_1').slider({
 			formater: function(value){
-			return 'Current value of min size with pixel:' + value;
+			return 'Current value of min size with the squre of pixel:' + value;
 				}
 			});
 	$('#min_size_pixel_1').on('slide',function (slideEvt) {
 			document.getElementById("min_size_pixel_val").value = slideEvt.value;
-			$("#minSizePixel_Val").text(slideEvt.value);
+			$("#minSizePixel_Val").text(slideEvt.value+"^2");
 			});
         $('#min_size_percent_1').slider({
 			formater: function(value){
