@@ -381,30 +381,20 @@ class ImagenetClassifier(object):
             starttime = time.time()
             scores = self.net.predict([image], oversample=True).flatten()
 	    endtime = time.time()
-
             indices = (-scores).argsort()[:5]
             predictions = self.labels[indices]
-
-            # In addition to the prediction text, we will also produce
-            # the length for the progress bar visualization.
             meta = [
                 (p, '%.5f' % scores[i])
                 for i, p in zip(indices, predictions)
             ]
-            #logging.info('result: %s', str(meta))
-
-            # Compute expected information gain
             expected_infogain = np.dot(
                 self.bet['probmat'], scores[self.bet['idmapping']])
             expected_infogain *= self.bet['infogain']
-            # sort the scores
             infogain_sort = expected_infogain.argsort()[::-1]
             bet_result = [(self.bet['words'][v], '%.5f' % expected_infogain[v])
                           for v in infogain_sort[:5]]
             logging.info('bet result: %s', str(bet_result))
-
             return (True, meta, bet_result, '%.3f' % (endtime - starttime))
-
         except Exception as err:
             logging.info('Classification error: %s', err)
             return (False, 'Something went wrong when classifying the '
