@@ -5,10 +5,14 @@
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
     <link rel="stylesheet" href="{{ url_for('static',filename='css/slider.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static',filename='css/bootstrap-switch.css')}}">
     <script type="text/javascript" src="//code.jquery.com/jquery-2.1.1.js"></script>
     <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="{{ url_for('static',filename='js/d3.min.js')}}"></script>
     <script type="text/javascript" src="{{ url_for('static',filename='js/bootstrap-slider.js')}}"></script>
+    <script type="text/javascript" src="{{ url_for('static',filename='js/highlight.js')}}"></script>
+    <script type="text/javascript" src="{{ url_for('static',filename='js/bootstrap-switch.js')}}"></script>
+    <script type="text/javascript" src="{{ url_for('static',filename='js/main.js')}}"></script>
     <title>Image Classification And Detection</title>
 
 
@@ -69,6 +73,9 @@
 	#min_size_percent_1{
 		width: 150%
 	}
+	#max_compression_size_1{
+		width: 150%
+	}
 	#cluster_number .slider-selection{
 		background: #BABABA;
 	}
@@ -83,6 +90,9 @@
 	}
 	#min_size_percent_2 .slider-selection{
 		background: #BABABA;
+	}
+	#max_compression_size_2 .slider-selection{
+	        background: #BABABA;
 	}
 	input{
 		float: center;
@@ -127,7 +137,7 @@
     </div>
     <div class="container">
       <div>
-        <h1>Configuration of parameters</h1>
+        <h1>Configuration of detection parameters</h1>
       </div>
       <form role="form" action="configure_parameter" method="get">
 	      <div class="form-group">
@@ -159,12 +169,59 @@
 						      <span id="current_value">Min Size Pixel: <span id="minSizePixel_Val" class="current_num">{{ origin_parameter[3] }}^2</span></span>
 				      </div>
 				      </h3>
-				      <h3>Min size of detected box by the percent:
+				      <h3 id="test">Min size of detected box by the percent:
 					      <div class="pull-right">
 						      <input type="text" data-slider-min="1" data-slider-max="100" data-slider-step="1" data-slider-value="{{ origin_parameter[4] }}" data-slider-id="min_size_percent_2" id="min_size_percent_1">
 						      <span id="current_value">Min Size Percent: <span id="minSizePercent_Val" class="current_num">{{ origin_parameter[4] }}%</span></span>
 					      </div>
 				      </h3>
+				      <h3>Image Compression before detection:
+				      		<div class="pull-right">
+							{% if origin_parameter[5] %}
+							<input id="compression" type="checkbox" data-handle-width="180" data-off-text="No Compression" data-on-text="Compression" name="compression"  data-size="large" checked
+							onchange="
+							var compression = $('#compression').bootstrapSwitch('state');
+							console.log(compression);
+							var elem = document.getElementById('compression_size_show') ;
+							console.log(elem);
+							if (compression == true ){
+								elem.style.display='inline';
+							        console.log('yes');	
+							}
+							else {
+								elem.style.display='none';
+							}
+							">	
+							{% else %}
+							<input id="compression" type="checkbox" data-handle-width="180" data-off-text="No Compression" data-on-text="Compression" name="compression"  data-size="large"
+							onchange="
+							var compression = $('#compression').bootstrapSwitch('state');
+							var elem = document.getElementById('compression_size_show') ;
+							if (compression == true ){
+								elem.style.display='inline';
+							}
+							else {
+								elem.style.display='none';
+							}
+							">	
+							{% endif %}
+						</div>
+				      </h3>
+				      {% if origin_parameter[5] %}
+				      <h3 id='compression_size_show' style='display:inline'>Max compression size of minimum between height and width:
+					      <div class="pull-right">
+						      <input type="text" data-slider-min="100" data-slider-max="1024" data-slider-step="1" data-slider-value="{{ origin_parameter[6] }}" data-slider-id="max_compression_size_2" id="max_compression_size_1">
+						      <span id="current_value">Max compression size: <span id="maxCompressionSize_Val" class="current_num">{{ origin_parameter[6] }}</span></span>
+					      </div>
+				      </h3>
+				      {% else %}
+				      <h3 id='compression_size_show' style='display:none'>Max compression size of minimum between height and width:
+					      <div class="pull-right">
+						      <input type="text" data-slider-min="100" data-slider-max="1024" data-slider-step="1" data-slider-value="{{ origin_parameter[6] }}" data-slider-id="max_compression_size_2" id="max_compression_size_1">
+						      <span id="current_value">Max compression size: <span id="maxCompressionSize_Val" class="current_num">{{ origin_parameter[6] }}</span></span>
+					      </div>
+				      </h3>
+				      {% endif %}
 
 			      </div>
 
@@ -173,6 +230,7 @@
 			      <input type="hidden" name="max_ratio_val" id="max_ratio_val" value="{{ origin_parameter[2] }}">
 			      <input type="hidden" name="min_size_pixel_val" id="min_size_pixel_val" value="{{ origin_parameter[3] }}">
 			      <input type="hidden" name="min_size_percent_val" id="min_size_percent_val" value="{{ origin_parameter[4] }}">
+			      <input type="hidden" name="max_compression_size_val" id="max_compression_size_val" value="{{ origin_parameter[6] }}">
 			      <div id="centerDiv"><input class="btn btn-danger btn-lg" value="Configure Parameters" type="submit" id="configure parameters"></input>
 		      </div>
 	     </div>
@@ -187,6 +245,7 @@
          $('#cluster_num').on('slide',function (slideEvt) {
 			 document.getElementById("cluster_num_val").value = slideEvt.value;
 			 $("#clusterNumber_Val").text(slideEvt.value);
+			 console.log("yes");
 			 });
 
 	$('#top_k_1').slider({
@@ -224,7 +283,17 @@
 	$('#min_size_percent_1').on('slide',function (slideEvt) {
 			document.getElementById("min_size_percent_val").value = slideEvt.value;
 			$("#minSizePercent_Val").text(slideEvt.value+"%");
-     			});
+			});
+
+        $('#max_compression_size_1').slider({
+			formater: function(value){
+			return 'Current value of max compression size:' + value;
+				}
+			});
+	$('#max_compression_size_1').on('slide',function (slideEvt) {
+			document.getElementById("max_compression_size_val").value = slideEvt.value;
+			$("#maxCompressionSize_Val").text(slideEvt.value);
+			});
      </script>
 
    

@@ -22,6 +22,7 @@ from sklearn import cluster
 import itertools
 from bing import Bing
 from bing import Boxes
+from enum import Enum
 
 PROJECT_DIRNAME = os.path.abspath(os.path.dirname(__file__))
 IMAGE_PREFIX = "/static/temp/"
@@ -33,6 +34,8 @@ ALLOWED_IMAGE_EXTENSIONS = set(['png', 'bmp', 'jpg', 'jpe', 'jpeg', 'gif'])
 COORD_COLS = ['ymin', 'xmin', 'ymax', 'xmax']
 RECTANGLE_COLOR = (0,0,255)
 TEXT_COLOR = (255,0,0)
+SQUARE_WAY_ENUM = Enum('upper','center','under','random','scale')
+
 # Obtain the flask app object
 app = flask.Flask(__name__)
 
@@ -56,8 +59,14 @@ def configure_parameter():
     max_ratio_val = int(flask.request.args.get('max_ratio_val',''))
     min_size_pixel_val = int(flask.request.args.get('min_size_pixel_val',''))
     min_size_percent_val = int(flask.request.args.get('min_size_percent_val',''))
+    compression_val = flask.request.args.get('compression','') 
+    if compression_val == '':
+        compression_val = False
+    else:
+        compression_val = True
+    max_compression_size_val = flask.request.args.get('max_compression_size_val','')
     app.det.set_configuration_parameter(cluster_num_val,top_k_in_cluster_val,max_ratio_val,
-            min_size_pixel_val,min_size_percent_val)
+            min_size_pixel_val,min_size_percent_val,compression_val,max_compression_size_val)
     updated_parameter=app.det.get_configuration_parameter()
     return flask.render_template('configuration_work.html',origin_parameter=origin_parameter,updated_parameter=updated_parameter)
 @app.route('/classification')
@@ -424,11 +433,18 @@ class ImagenetDetection(object):
         default_args['max_ratio'] = 4
         default_args['min_size'] = 10
         default_args['min_size_percent']=100
+        default_args['compress'] = True
+        default_args['compress_min_height_width'] = 512
+        default_args['need_square'] = False
+        default_args['square_way'] = 0 
         def get_configuration_parameter(self):
             return (self.cluster_num , self.top_k_in_cluster , self.max_ratio ,
-                    self.min_size , self.min_size_percent)
-        def set_configuration_parameter(self,cluster_num,top_k_in_cluster,
-                max_ratio,min_size,min_size_percent):
+                    self.min_size , self.min_size_percent, 
+                    self.compress , self.compress_min_height_width ,
+                    self.need_square , self.square_way )
+        def set_configuration_parameter(self,cluster_num,top_k_in_cluste,
+                max_ratio,min_size,min_size_percent, compress,compress_min_height_width,
+                need_square,square_way):
             logging.info("Cluster Number change from {:} to {:}".format(self.cluster_num,cluster_num)) 
             self.cluster_num = cluster_num 
             logging.info("Top K in cluster change from {:} to {:}".format(self.top_k_in_cluster,top_k_in_cluster)) 
@@ -439,10 +455,22 @@ class ImagenetDetection(object):
             self.min_size = min_size
             logging.info("Min Size Percent change from {:} to {:}".format(self.min_size_percent,min_size_percent))
             self.min_size_percent = min_size_percent
-            self.spectral = cluster.SpectralClustering(n_clusters=cluster_num,affinity='precomputed') 
+            self.spectral = cluster.SpectralClustering(n_clusters=cluster_num,affinity='precomputed')
+            logging.info("Image Compression change from {:} to {:}".format(self.compress,compress))
+            self.compress = compress
+            if self.compress == True:
+                logging.info("The max size of the minimum between height and width change from {:} to {:}".format(self.compress_min_height_width , compress_min_height_width ))
+                self.compress_min_height_width = compress_min_height_width
+            logging.info("Wheather image need square operation change from {:} to {:}".format(self.need_square,need_square))
+            self.need_square = need_square
+            if self.need_square == True:
+                logging.info("The way of square operation change from {:} to {:}".format(str(SQUARE_WAY_ENUM[ self.square_way ]), str(SQUARE_WAY_ENUM[ square_way ])))
+                self.square_way = square_way
         def __init__(self,model_def_file, pretrained_model_file , mean_file , class_labels_file , bing_model , gpu_mode , raw_scale ,
                 image_dim , channel_swap , context_pad , 
                 cluster_num , top_k_in_cluster ,  max_ratio , min_size , min_size_percent ,
+                compress , compress_min_height_width , 
+                need_square , square_way ,
                 input_scale = None ):
 		logging.info('Loading net and associated files...')
                 mean , channel = None , None 
@@ -474,6 +502,10 @@ class ImagenetDetection(object):
                 self.min_size = min_size
                 self.min_size_percent = min_size_percent
                 self.min_pixel_by_min = self.min_size
+                self.compress = compress
+                self.compress_min_height_width = compress_min_height_width
+                self.need_square = need_square 
+                self.square_way = square_way
                 self.spectral = cluster.SpectralClustering(n_clusters=cluster_num,affinity='precomputed')
         def removeIOUandOverlap(self,i,index,x1,y1,x2,y2,area,iou,overlap):
             xx1 = np.maximum(x1[i],x1[index])
