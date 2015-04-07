@@ -98,11 +98,11 @@
     </div>
     <div class="container">
       <div>
-        <h1>Configuration of detection parameters</h1>
-     
+        <h1>The change of detection parameters</h1> 
       </div>
       <div class="well">
 	      <div>
+		      {% if origin_parameter[0] != updated_parameter[0] %}
 		      <h3>The cluster number of SpectralClustering:
 			      <span class="origin_num">{{ origin_parameter[0] }}</span>
 			      &nbsp;&nbsp;&nbsp;
@@ -110,6 +110,8 @@
 			      &nbsp;&nbsp;&nbsp;
 			      <span class="current_num">{{ updated_parameter[0] }}</span>
 		      </h3>
+		      {% endif %}
+		      {% if origin_parameter[1] != updated_parameter[1] %}
 		      <h3>Top K boxes in  each cluster:
 			      <span class="origin_num">{{ origin_parameter[1] }}</span>
 			      &nbsp;&nbsp;&nbsp;
@@ -117,6 +119,8 @@
 			      &nbsp;&nbsp;&nbsp;
 			      <span class="current_num">{{ updated_parameter[1] }}</span>
 		      </h3>
+		      {% endif %}
+		      {% if origin_parameter[2] != updated_parameter[2] %}
 		      <h3>Max ratio of height and width:
 			      <span class="origin_num">{{ origin_parameter[2] }}</span>
 			      &nbsp;&nbsp;&nbsp;
@@ -124,6 +128,8 @@
 			      &nbsp;&nbsp;&nbsp;
 			      <span class="current_num">{{ updated_parameter[2] }}</span>
 		      </h3>
+		      {% endif %}
+		      {% if origin_parameter[3] != updated_parameter[3] %}
 		      <h3>Min size of detected box by the square of pixel:
 			      <span class="origin_num">{{ origin_parameter[3] }}^2</span>
 			      &nbsp;&nbsp;&nbsp;
@@ -131,6 +137,8 @@
 			      &nbsp;&nbsp;&nbsp;
 			      <span class="current_num">{{ updated_parameter[3] }}^2</span>
 		      </h3>
+		      {% endif %}
+		      {% if origin_parameter[4] != updated_parameter[4] %}
 		      <h3>Min size of detected box by the percent:
 			      <span class="origin_num">{{ origin_parameter[4] }}</span>
 			      &nbsp;&nbsp;&nbsp;
@@ -138,6 +146,52 @@
 			      &nbsp;&nbsp;&nbsp;
 			      <span class="current_num">{{ updated_parameter[4] }}</span>
 		      </h3>
+		      {% endif %}
+		      {% if origin_parameter[5] != updated_parameter[5] %}
+		      <h3>Image Compression before detection:
+			      <span class="origin_num">{{ origin_parameter[5] }}</span>
+			      &nbsp;&nbsp;&nbsp;
+			      <span class='arrow-primary-large' data-angle='90'></span>		
+			      &nbsp;&nbsp;&nbsp;
+			      <span class="current_num">{{ updated_parameter[5] }}</span>
+		      </h3>
+		      {% endif %}
+		      {% if updated_parameter[5] %}
+		      	{% if ( origin_parameter[5] != updated_parameter[5] ) or ( origin_parameter[6] != updated_parameter[6] ) %} 
+			<h3>Max compression size of minimum(height,width):
+			      <span class="origin_num">{{ origin_parameter[6] }}</span>
+			      &nbsp;&nbsp;&nbsp;
+			      <span class='arrow-primary-large' data-angle='90'></span>		
+			      &nbsp;&nbsp;&nbsp;
+			      <span class="current_num">{{ updated_parameter[6] }}</span>
+		        </h3>
+		      	{% endif %}
+		      {% endif %}
+		      {% if origin_parameter[7] != updated_parameter[7] %}
+		      <h3>Squaring image before detection:
+			      <span class="origin_num">{{ origin_parameter[7] }}</span>
+			      &nbsp;&nbsp;&nbsp;
+			      <span class='arrow-primary-large' data-angle='90'></span>		
+			      &nbsp;&nbsp;&nbsp;
+			      <span class="current_num">{{ updated_parameter[7] }}</span>
+		      </h3>
+		      {% endif %}
+		      {% if updated_parameter[7] %}
+		      	{% if (origin_parameter[7] != updated_parameter[7]) or (origin_parameter[8] != updated_parameter[8] ) %}
+			<h3>The way to square image:
+			      <span class="origin_num">{{ origin_parameter[8] }}</span>
+			      &nbsp;&nbsp;&nbsp;
+			      <span class='arrow-primary-large' data-angle='90'></span>		
+			      &nbsp;&nbsp;&nbsp;
+			      <span class="current_num">{{ updated_parameter[8] }}</span>
+		        </h3>
+			{% endif %}
+		      {% endif %}
+		      {% if not parameter_change %}
+		      <h1 class="text-center">
+			      There are no parameters change.
+		      </h1> 
+		      {% endif %}
 	      </div>
       </div>
       <script type="text/javascript">     

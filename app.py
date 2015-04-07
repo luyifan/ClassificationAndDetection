@@ -54,34 +54,45 @@ def detection():
 def configuration():
     origin_parameter = app.det.get_configuration_parameter()
     return flask.render_template('configuration.html',
-                                 origin_parameter=origin_parameter)
+                                 origin_parameter=origin_parameter,
+                                 SQUARE_WAY_ENUM=SQUARE_WAY_ENUM)
 
 
-@app.route('/configure_parameter')
+@app.route('/configure_parameter', methods=['POST'])
 def configure_parameter():
     origin_parameter = app.det.get_configuration_parameter()
-    cluster_num_val = int(flask.request.args.get('cluster_num_val', ''))
-    top_k_in_cluster_val = int(flask.request.args.get('top_k_in_cluster_val',
-                                                      ''))
-    max_ratio_val = int(flask.request.args.get('max_ratio_val', ''))
-    min_size_pixel_val = int(flask.request.args.get('min_size_pixel_val', ''))
-    min_size_percent_val = int(flask.request.args.get('min_size_percent_val',
-                                                      ''))
-    compression_val = flask.request.args.get('compression', '')
-    if compression_val == '':
+    cluster_num_val = int(flask.request.form['cluster_num_val'])
+    top_k_in_cluster_val = int(flask.request.form['top_k_in_cluster_val'])
+    max_ratio_val = int(flask.request.form['max_ratio_val'])
+    min_size_pixel_val = int(flask.request.form['min_size_pixel_val'])
+    min_size_percent_val = int(flask.request.form['min_size_percent_val'])
+    compression_val = flask.request.form.get('compression')
+    if compression_val is None:
         compression_val = False
     else:
         compression_val = True
-    max_compression_size_val = flask.request.args.get(
-        'max_compression_size_val', '')
-    app.det.set_configuration_parameter(cluster_num_val, top_k_in_cluster_val,
-                                        max_ratio_val, min_size_pixel_val,
-                                        min_size_percent_val, compression_val,
-                                        max_compression_size_val)
+    max_compression_size_val = flask.request.form['max_compression_size_val']
+    squareness_val = flask.request.form.get('squareness')
+    if squareness_val is None:
+        squareness_val = False
+    else:
+        squareness_val = True
+    squareness_way_val = flask.request.form['squareness_way_val']
+    app.det.set_configuration_parameter(
+        cluster_num_val, top_k_in_cluster_val, max_ratio_val,
+        min_size_pixel_val, min_size_percent_val, compression_val,
+        max_compression_size_val, squareness_val, squareness_way_val)
     updated_parameter = app.det.get_configuration_parameter()
+    parameter_len = len(origin_parameter)
+    parameter_change = False
+    for i in range(parameter_len):
+        if origin_parameter[i] != updated_parameter[i]:
+            parameter_change = True
+
     return flask.render_template('configuration_work.html',
                                  origin_parameter=origin_parameter,
-                                 updated_parameter=updated_parameter)
+                                 updated_parameter=updated_parameter,
+                                 parameter_change=parameter_change)
 
 
 @app.route('/classification')
@@ -486,7 +497,7 @@ class ImagenetDetection(object):
     default_args['compress'] = True
     default_args['compress_min_height_width'] = 512
     default_args['need_square'] = False
-    default_args['square_way'] = 0
+    default_args['square_way'] = SQUARE_WAY_ENUM[3]
 
     def get_configuration_parameter(self):
         return (self.cluster_num, self.top_k_in_cluster, self.max_ratio,
@@ -494,7 +505,7 @@ class ImagenetDetection(object):
                 self.compress_min_height_width, self.need_square,
                 self.square_way)
 
-    def set_configuration_parameter(self, cluster_num, top_k_in_cluste,
+    def set_configuration_parameter(self, cluster_num, top_k_in_cluster,
                                     max_ratio, min_size, min_size_percent,
                                     compress, compress_min_height_width,
                                     need_square, square_way):
@@ -532,9 +543,10 @@ class ImagenetDetection(object):
         if self.need_square == True:
             logging.info(
                 "The way of square operation change from {:} to {:}".format(
-                    str(SQUARE_WAY_ENUM[self.square_way]),
-                    str(SQUARE_WAY_ENUM[square_way])))
-            self.square_way = square_way
+                    self.square_way, square_way))
+            for one_way in SQUARE_WAY_ENUM:
+                if str(one_way) == square_way:
+                    self.square_way = one_way
 
     def __init__(self, model_def_file, pretrained_model_file, mean_file,
                  class_labels_file, bing_model, gpu_mode, raw_scale, image_dim,
@@ -680,8 +692,8 @@ class ImagenetDetection(object):
         for i in range(windows_size):
             if (area[i] < self.min_pixel_by_min):
                 continue
-            if (width[i] * 1.0 / height[i] > self.max_ratio or height[i] * 1.0
-                / width[i] > self.max_ratio):
+            if (width[i] * 1.0 / height[i] > self.max_ratio or
+                height[i] * 1.0 / width[i] > self.max_ratio):
                 continue
             label = self.spectral.labels_[i]
             if len(index_dictionary[label]) >= self.top_k_in_cluster:
@@ -767,10 +779,10 @@ class ImagenetDetection(object):
             label = self.labels.loc[int(row['category_id']), 'name']
             #(xmin,ymin,xmax,ymax,label)=(int(row['xmin']),int(row['ymin']),int(row['xmax']),int(row['ymax']),self.labels.loc[int(row['category_id']),'name'])
             #cv2.rectangle(img,(xmin,ymin),(xmax,ymax),RECTANGLE_COLOR,3)
-            result.append(
-                (label, row['value'], index_box, row['ymin'] / image_size[0],
-                 (row['ymax'] - row['ymin']) / image_size[0], row['xmin'] /
-                 image_size[1], (row['xmax'] - row['xmin']) / image_size[1]))
+            result.append((label, row['value'], index_box, row['ymin'] /
+                           image_size[0], (row['ymax'] - row['ymin']) /
+                           image_size[0], row['xmin'] / image_size[1],
+                           (row['xmax'] - row['xmin']) / image_size[1]))
             #cv2.putText(img,label,(xmin+10,ymin+10),font,0.5,TEXT_COLOR,1)
             #newimagelist=imagefilename.rsplit('.',1)
             #newimagefilename=newimagelist[0]+'Result.'+newimagelist[1]
@@ -778,10 +790,10 @@ class ImagenetDetection(object):
         for index, row in max_all.iterrows():
             index_box = index_box + 1
             label = self.labels.loc[int(row['category_id']), 'name']
-            result_all.append(
-                (label, row['value'], index_box, row['ymin'] / image_size[0],
-                 (row['ymax'] - row['ymin']) / image_size[0], row['xmin'] /
-                 image_size[1], (row['xmax'] - row['xmin']) / image_size[1]))
+            result_all.append((label, row['value'], index_box, row['ymin'] /
+                               image_size[0], (row['ymax'] - row['ymin']) /
+                               image_size[0], row['xmin'] / image_size[1],
+                               (row['xmax'] - row['xmin']) / image_size[1]))
         endtime = time.time()
         #print endtime - midtime
         logging.info("Processed {} windows in {:.3f} s.".format(

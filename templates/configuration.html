@@ -139,7 +139,7 @@
       <div>
         <h1>Configuration of detection parameters</h1>
       </div>
-      <form role="form" action="configure_parameter" method="get">
+      <form role="form" action="configure_parameter" method="post">
 	      <div class="form-group">
 		      <!--<div class="input-group">!-->
 			      <div class="well">
@@ -181,12 +181,9 @@
 							<input id="compression" type="checkbox" data-handle-width="180" data-off-text="No Compression" data-on-text="Compression" name="compression"  data-size="large" checked
 							onchange="
 							var compression = $('#compression').bootstrapSwitch('state');
-							console.log(compression);
 							var elem = document.getElementById('compression_size_show') ;
-							console.log(elem);
 							if (compression == true ){
 								elem.style.display='inline';
-							        console.log('yes');	
 							}
 							else {
 								elem.style.display='none';
@@ -222,7 +219,80 @@
 					      </div>
 				      </h3>
 				      {% endif %}
-
+				      <h3>Squaring image before detection:
+				      		<div class="pull-right">
+							{% if origin_parameter[7] %}
+							<input id="squareness" type="checkbox" data-handle-width="180" data-off-text="No Squareness" data-on-text="Squareness" name="squareness"  data-size="large" checked
+							onchange="
+							var squareness = $('#squareness').bootstrapSwitch('state');
+							var elem = document.getElementById('squareness_way_show');
+							var elem2 = document.getElementById('squareness_way_show_radio');
+							if (squareness == true ){
+								elem.style.display='inline';
+								elem2.style.display='inline';
+							}
+							else {
+								elem.style.display='none';
+								elem2.style.display='none';
+							}
+							">	
+							{% else %}
+							<input id="squareness" type="checkbox" data-handle-width="180" data-off-text="No Squareness" data-on-text="Squareness" name="squareness"  data-size="large"
+							onchange="
+							var squareness = $('#squareness').bootstrapSwitch('state');
+							var elem = document.getElementById('squareness_way_show') ;
+							var elem2 = document.getElementById('squareness_way_show_radio');
+							if (squareness == true ){
+								elem.style.display='inline';
+								elem2.style.display='inline';
+							}
+							else {
+								elem.style.display='none';
+								elem2.style.display='none';
+							}
+							">	
+							{% endif %}
+						</div>
+				      </h3>
+				      {% if origin_parameter[7] %}
+				      <h3 id='squareness_way_show'>The Way to square image:
+					      </br></br>
+				      </h3>
+				      <h3 id='squareness_way_show_radio'>
+				      <div class="text-center">
+						      {% for one_way in SQUARE_WAY_ENUM %}
+						         {% if one_way == origin_parameter[8] %}
+							 <label class="radio-inline">
+							    	 <input name="squareness_way_val" value="{{ one_way }}" type="radio" checked="checked"> {{ one_way }}
+							 </label>
+							 {% else %}
+							 <label class="radio-inline">
+							    	 <input name="squareness_way_val" value="{{ one_way }}" type="radio"> {{ one_way }}
+							 </label>
+							 {% endif %}
+						      {% endfor %}
+				      </div>
+				      </h3>
+				      {% else %}
+				      <h3 id='squareness_way_show' style='display:none'>The Way to square image:
+					      </br></br>
+				      </h3>
+				      <h3 id='squareness_way_show_radio' style='display:none'>
+				      <div class="text-center">
+						      {% for one_way in SQUARE_WAY_ENUM %}
+						      	 {% if one_way == origin_parameter[8] %}
+							 <label class="radio-inline">
+							    	 <input name="squareness_way_val" value="{{ one_way }}" type="radio" checked="checked"> {{ one_way }}
+							 </label>
+							 {% else %}
+							 <label class="radio-inline">
+							    	 <input name="squareness_way_val" value="{{ one_way }}" type="radio"> {{ one_way }}
+							 </label>
+							 {% endif %}
+						      {% endfor %}
+				      </div>
+				      </h3>
+				      {% endif %}
 			      </div>
 
 			      <input type="hidden" name="cluster_num_val"  id="cluster_num_val"  value="{{ origin_parameter[0] }}"> 
@@ -245,9 +315,11 @@
          $('#cluster_num').on('slide',function (slideEvt) {
 			 document.getElementById("cluster_num_val").value = slideEvt.value;
 			 $("#clusterNumber_Val").text(slideEvt.value);
-			 console.log("yes");
 			 });
-
+        $('#cluster_num').on('change',function () {
+			document.getElementById("cluster_num_val").value = $(this).context.value;
+			$("#clusterNumber_Val").text($(this).context.value);
+			});
 	$('#top_k_1').slider({
 			formater: function(value) {
 			 return 'Current value of top k in each cluster:' + value;
@@ -256,6 +328,10 @@
         $('#top_k_1').on('slide',function (slideEvt) {
 			document.getElementById("top_k_in_cluster_val").value = slideEvt.value;
 			$("#topK_Val").text(slideEvt.value);
+			});
+        $('#top_k_1').on('change',function () {
+			document.getElementById("top_k_in_cluster_val").value = $(this).context.value;
+			$("#topK_Val").text($(this).context.value);
 			});
         $('#max_ratio_1').slider({
 			formater: function(value) {
@@ -266,6 +342,10 @@
 			document.getElementById("max_ratio_val").value = slideEvt.value;
 			$("#maxRatio_Val").text(slideEvt.value);
 			});
+        $('#max_ratio_1').on('change',function () {
+			document.getElementById("max_ratio_val").value = $(this).context.value;
+			$("#maxRatio_Val").text($(this).context.value);
+			});
         $('#min_size_pixel_1').slider({
 			formater: function(value){
 			return 'Current value of min size with the squre of pixel:' + value;
@@ -274,6 +354,10 @@
 	$('#min_size_pixel_1').on('slide',function (slideEvt) {
 			document.getElementById("min_size_pixel_val").value = slideEvt.value;
 			$("#minSizePixel_Val").text(slideEvt.value+"^2");
+			});
+        $('#min_size_pixel_1').on('change',function () {
+			document.getElementById("min_size_pixel_val").value = $(this).context.value;
+			$("#minSizePixel_Val").text($(this).context.value+"^2");
 			});
         $('#min_size_percent_1').slider({
 			formater: function(value){
@@ -284,6 +368,10 @@
 			document.getElementById("min_size_percent_val").value = slideEvt.value;
 			$("#minSizePercent_Val").text(slideEvt.value+"%");
 			});
+        $('#min_size_percent_1').on('change',function () {
+			document.getElementById("min_size_percent_val").value = $(this).context.value;
+			$("#minSizePercent_Val").text($(this).context.value+"%");
+			});
 
         $('#max_compression_size_1').slider({
 			formater: function(value){
@@ -293,6 +381,10 @@
 	$('#max_compression_size_1').on('slide',function (slideEvt) {
 			document.getElementById("max_compression_size_val").value = slideEvt.value;
 			$("#maxCompressionSize_Val").text(slideEvt.value);
+			});
+        $('#max_compression_size_1').on('change',function () {
+			document.getElementById("max_compression_size_val").value = $(this).context.value;
+			$("#maxCompressionSize_Val").text($(this).context.value);
 			});
      </script>
 
