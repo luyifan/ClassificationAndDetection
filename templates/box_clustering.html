@@ -2,13 +2,13 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
-    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
-    <script type="text/javascript" src="//code.jquery.com/jquery-2.1.1.js"></script>
-    <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="{{ url_for('static',filename='js/d3.min.js')}}"></script>
     <title>Image Classification And Detection</title>
     <!-- Script to instantly classify an image once it is uploaded. -->
+    <link rel="stylesheet" href="{{ url_for('static',filename='css/bootstrap.min.css')}}" >
+    <link rel="stylesheet" href="{{ url_for('static',filename='css/bootstrap-theme.min.css')}}">
+    <script type="text/javascript" src="{{ url_for('static',filename='js/jquery.js')}}"></script>
+    <script type="text/javascript" src="{{ url_for('static',filename='js/bootstrap.min.js')}}"></script>
+    <script type="text/javascript" src="{{ url_for('static',filename='js/d3.min.js')}}"></script>
     <script type="text/javascript">
       $(document).ready(
         function(){
@@ -66,10 +66,10 @@
 		    <!-- Collect the nav links, forms, and other content for toggling -->
 		    <div class="navbar-collapse collapse" id="bs-example-navbar-collapse-9" aria-expanded="false" style="height: 1px;">
 			    <ul class="nav navbar-nav">
-				    <li class="active"><a href="/">Home</a></li>
+				    <li><a href="/">Home</a></li>
 				    <li><a href="/classification">Classification</a></li>
 				    <li><a href="/detection">Detection</a></li>
-				    <li><a href="/box_clustering">Box_Clustering</a></li>
+				    <li class="active"><a href="/box_clustering">Box_Clustering</a></li>
 				    <li><a href="/configuration">Configuration</a></li>
 			    </ul>
 		    </div><!-- /.navbar-collapse -->
