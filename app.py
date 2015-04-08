@@ -71,7 +71,8 @@ def configure_parameter():
         compression_val = False
     else:
         compression_val = True
-    max_compression_size_val = flask.request.form['max_compression_size_val']
+    max_compression_size_val = int(
+        flask.request.form['max_compression_size_val'])
     squareness_val = flask.request.form.get('squareness')
     if squareness_val is None:
         squareness_val = False
@@ -151,6 +152,9 @@ def detect_url():
             has_result=True,
             result=(False, 'Cannot open image from URL.'))
     logging.info('Image: %s', imageurl)
+    preprocessing_image(image,
+                        (app.det.compress, app.det.compress_min_height_width,
+                         app.det.need_square, app.det.square_way))
     filename_ = str(datetime.datetime.now()).replace(' ', '_') + \
             imageurl.split('/')[-1]
     filename = os.path.join(UPLOAD_FOLDER, filename_)
@@ -387,6 +391,69 @@ def embed_image_html(image):
 def allowed_file(filename):
     return ('.' in filename and
             filename.rsplit('.', 1)[1] in ALLOWED_IMAGE_EXTENSIONS)
+
+
+def do_compression_image(image_maxtrix, compress_min_height_width):
+    (height, width) = image_maxtrix.shape[:-1]
+    min_between = min(height, width)
+    if min_between < compress_min_height_width:
+        logging.info(
+            "The image minimum between height and width is less than requirement,Don't need compression")
+        return image_maxtrix
+    image_maxtrix = caffe.io.resize_image(image_maxtrix, (
+        int(height * 1.0 / min_between * compress_min_height_width),
+        int(width * 1.0 / min_between * compress_min_height_width)))
+    return image_maxtrix
+
+
+def do_squareness_image(image_maxtrix, square_way):
+    (height, width) = image_maxtrix.shape[:-1]
+    if (height > width):
+        if square_way == SQUARE_WAY_ENUM.upper:
+            image_maxtrix = image_maxtrix[0:width,::]
+        elif square_way == SQUARE_WAY_ENUM.center:
+            image_maxtrix = image_maxtrix[(height - width) / 2:(height + width)
+                                          / 2,::]
+        elif square_way == SQUARE_WAY_ENUM.under:
+            image_maxtrix = image_maxtrix[height - width:height,::]
+        elif square_way == SQUARE_WAY_ENUM.random:
+            random_height = random.randint(0, height - width)
+            image_maxtrix = image_maxtrix[random_height:random_height + width,::]
+        else:
+            image_maxtrix = caffe.io.resize_image(image_maxtrix,
+                                                  (width, width))
+    else:
+        if square_way == SQUARE_WAY_ENUM.upper:
+            image_maxtrix = image_maxtrix[:, 0:height,:]
+        elif square_way == SQUARE_WAY_ENUM.center:
+            image_maxtrix = image_maxtrix[:, (width - height) / 2:
+                                          (width + height) / 2,:]
+        elif square_way == SQUARE_WAY_ENUM.under:
+            image_maxtrix = image_maxtrix[:, width - height:width,:]
+        elif square_way == SQUARE_WAY_ENUM.random:
+            random_width = random.randint(0, width - height)
+            image_maxtrix = image_maxtrix[:, random_width:random_width +
+                                          height,:]
+        else:
+            image_maxtrix = caffe.io.resize_image(image_maxtrix,
+                                                  (height, height))
+    return image_maxtrix
+
+
+def preprocessing_image(image_maxtrix, operation):
+    (compress, compress_min_height_width, need_square, square_way) = operation
+    if compress:
+        image_maxtrix = do_compression_image(image_maxtrix,
+                                             compress_min_height_width)
+        logging.info("The Compression Operation is Finished")
+    else:
+        logging.info("The Compression Operation is False,Pass")
+    if need_square:
+        image_maxtrix = do_squareness_image(image_maxtrix, square_way)
+        logging.info("The Squareness Operation is Finished")
+    else:
+        logging.info("The Squareness Operation is False,Pass")
+    return image_maxtrix
 
 
 class ImagenetClassifier(object):
