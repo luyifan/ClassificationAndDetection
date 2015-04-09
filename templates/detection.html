@@ -196,6 +196,10 @@
 
         </div>
       </div>
+      {% if not  result[4] %}
+      </br></br></br></br></br>
+      </br></br></br></br></br>
+      {% endif %}
       <p class="spendtime"> Total took {{ result[3] }} seconds. </p>
       {% endif %}
       <hr>

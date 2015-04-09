@@ -879,6 +879,7 @@ class ImagenetDetection(object):
             #newimagelist=imagefilename.rsplit('.',1)
             #newimagefilename=newimagelist[0]+'Result.'+newimagelist[1]
             #cv2.imwrite(newimagefilename,img)
+        now_index_box = index_box
         for index, row in max_all.iterrows():
             index_box = index_box + 1
             label = self.labels.loc[int(row['category_id']), 'name']
@@ -890,8 +891,10 @@ class ImagenetDetection(object):
         #print endtime - midtime
         logging.info("Processed {} windows in {:.3f} s.".format(
             len(detections), endtime - starttime))
-        return (True, result, result_all, '%.3f' % (endtime - starttime))
-
+        if now_index_box > 5:
+            return (True, result, result_all, '%.3f' % (endtime - starttime), True)
+        else:
+            return (True, result, result_all, '%.3f' % (endtime - starttime), False)
     def cluster_boxes_of_image(self, imagefilename):
         starttime = time.time()
         boxes = self.bing_search.getBoxesOfOneImage(imagefilename, 130)
@@ -918,7 +921,10 @@ class ImagenetDetection(object):
             cluster_list.append(
                 (index_of_cluster, each_cluster, index_in_cluster))
         endtime = time.time()
-        return (True, cluster_list, '%.3f' % (endtime - starttime))
+        if self.cluster_num > 5:
+            return (True, cluster_list, '%.3f' % (endtime - starttime), True)
+        else:
+            return (True, cluster_list, '%.3f' % (endtime - starttime), False)
 
 
 def start_tornado(app, port=5000):
