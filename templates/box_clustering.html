@@ -126,7 +126,7 @@
 				var ylen = height * {{ one_box[2] }};
 				var xmin = width *  {{ one_box[3] }};
 				var xlen = width *  {{ one_box[4] }};
-				svg.append("svg:rect").attr("id","box_{{ one_box[0] }}").attr("x",xmin).attr("y",ymin).attr("width",xlen).attr("height",ylen).style("stroke-width","2px").style("fill-opacity",0).style("stroke","red").style('visibility','hidden');
+				svg.append("svg:rect").attr("id","box_{{ one_box[0] }}").attr("x",xmin).attr("y",ymin).attr("width",xlen).attr("height",ylen).style("stroke-width","3px").style("fill-opacity",0).style("stroke",d3.rgb({{ one_box[5] }},{{ one_box[6] }},{{ one_box[7] }})).style('visibility','hidden');
 			}
 			drawBox();
 		  </script>
