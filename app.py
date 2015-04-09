@@ -152,7 +152,7 @@ def detect_url():
             has_result=True,
             result=(False, 'Cannot open image from URL.'))
     logging.info('Image: %s', imageurl)
-    preprocessing_image(image,
+    image = preprocessing_image(image,
                         (app.det.compress, app.det.compress_min_height_width,
                          app.det.need_square, app.det.square_way))
     filename_ = str(datetime.datetime.now()).replace(' ', '_') + \
@@ -182,6 +182,9 @@ def cluster_url():
             has_result=True,
             result=(False, 'Cannot open image from URL.'))
     logging.info('Image: %s', imageurl)
+    image = preprocessing_image(image,
+                        (app.det.compress, app.det.compress_min_height_width,
+                         app.det.need_square, app.det.square_way))
     filename_ = str(datetime.datetime.now()).replace(' ', '_') + \
             imageurl.split('/')[-1]
     filename = os.path.join(UPLOAD_FOLDER, filename_)
@@ -198,8 +201,10 @@ def cluster_url():
 def detect_random():
     index = random.randint(0, len(app.random_detection_list) - 1)
     filename = os.path.join(RANDOM_DETECTION, app.random_detection_list[index])
+    (filename,image)=preprocessing_imagefile(filename,
+            (app.det.compress, app.det.compress_min_height_width,
+             app.det.need_square, app.det.square_way))
     result = app.det.detect_image(str(filename))
-    image = exifutil.open_oriented_im(filename)
     return flask.render_template('detection.html',
                                  has_result=True,
                                  result=result,
@@ -210,8 +215,10 @@ def detect_random():
 def cluster_random():
     index = random.randint(0, len(app.random_detection_list) - 1)
     filename = os.path.join(RANDOM_DETECTION, app.random_detection_list[index])
+    (filename,image)=preprocessing_imagefile(filename,
+            (app.det.compress, app.det.compress_min_height_width,
+             app.det.need_square, app.det.square_way))
     result = app.det.cluster_boxes_of_image(str(filename))
-    image = exifutil.open_oriented_im(filename)
     return flask.render_template('box_clustering.html',
                                  has_result=True,
                                  result=result,
@@ -276,13 +283,13 @@ def detect_upload():
             'detection.html',
             has_result=True,
             result=(False, 'Cannot open uploaded image.'))
+    (filename,image)=preprocessing_imagefile(filename,
+            (app.det.compress, app.det.compress_min_height_width,
+             app.det.need_square, app.det.square_way))
     result = app.det.detect_image(str(filename))
-    #print result
-    image = exifutil.open_oriented_im(str(filename))
     return flask.render_template('detection.html',
                                  has_result=True,
                                  result=result,
-                                 #imagesrc=IMAGE_PREFIX+filename_
                                  imagesrc=embed_image_html(image))
 
 
@@ -301,8 +308,10 @@ def cluster_upload():
             'box_clustering.html',
             has_result=True,
             result=(False, 'Cannot open uploaded image.'))
+    (filename,image)=preprocessing_imagefile(filename,
+            (app.det.compress, app.det.compress_min_height_width,
+             app.det.need_square, app.det.square_way))
     result = app.det.cluster_boxes_of_image(str(filename))
-    image = exifutil.open_oriented_im(str(filename))
     return flask.render_template('box_clustering.html',
                                  has_result=True,
                                  result=result,
@@ -323,8 +332,10 @@ def detect_local():
         return flask.render_template('detection.html',
                                      has_result=True,
                                      result=(False, 'Detect image path error'))
-    result = app.det.detect_image(str(imagefilename))
-    image = exifutil.open_oriented_im(str(imagefilename))
+    (filename,image)=preprocessing_imagefile(imagefilename,
+            (app.det.compress, app.det.compress_min_height_width,
+             app.det.need_square, app.det.square_way))
+    result = app.det.detect_image(str(filename))
     return flask.render_template('detection.html',
                                  has_result=True,
                                  result=result,  #imagesrc="/static/"+filename_
@@ -347,8 +358,10 @@ def cluster_local():
             'box_clustering.html',
             has_result=True,
             result=(False, 'Cluster boxes of error image'))
-    result = app.det.cluster_boxes_of_image(str(imagefilename))
-    image = exifutil.open_oriented_im(str(imagefilename))
+    (filename,image)=preprocessing_imagefile(imagefilename,
+            (app.det.compress, app.det.compress_min_height_width,
+             app.det.need_square, app.det.square_way))
+    result = app.det.cluster_boxes_of_image(str(filename))
     return flask.render_template('box_clustering.html',
                                  has_result=True,
                                  result=result,
@@ -454,7 +467,14 @@ def preprocessing_image(image_maxtrix, operation):
     else:
         logging.info("The Squareness Operation is False,Pass")
     return image_maxtrix
-
+def preprocessing_imagefile(imagefilename, operation):
+    filename_ = str(datetime.datetime.now()).replace(' ','_') + \
+            imagefilename.split('/')[-1]
+    filename = os.path.join(UPLOAD_FOLDER,filename_)
+    image_maxtrix = caffe.io.load_image(imagefilename)
+    image_maxtrix = preprocessing_image(image_maxtrix,operation)
+    skimage.io.imsave(filename,image_maxtrix)
+    return ( filename , image_maxtrix )
 
 class ImagenetClassifier(object):
     default_args = {
