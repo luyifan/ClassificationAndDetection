@@ -53,14 +53,17 @@ def detection():
 @app.route('/configuration')
 def configuration():
     origin_parameter = app.det.get_configuration_parameter()
+    display_parameter = app.display.get_display_parameter()
     return flask.render_template('configuration.html',
                                  origin_parameter=origin_parameter,
+                                 display_parameter=display_parameter,
                                  SQUARE_WAY_ENUM=SQUARE_WAY_ENUM)
 
 
 @app.route('/configure_parameter', methods=['POST'])
 def configure_parameter():
     origin_parameter = app.det.get_configuration_parameter()
+    origin_display_parameter = app.display.get_display_parameter()
     cluster_num_val = int(flask.request.form['cluster_num_val'])
     top_k_in_cluster_val = int(flask.request.form['top_k_in_cluster_val'])
     max_ratio_val = int(flask.request.form['max_ratio_val'])
@@ -79,21 +82,40 @@ def configure_parameter():
     else:
         squareness_val = True
     squareness_way_val = flask.request.form['squareness_way_val']
+    display_squareness_val = flask.request.form.get('display_squareness')
+    if display_squareness_val is None:
+        display_squareness_val = False
+    else:
+        display_squareness_val = True
+    display_width_size_val = int(flask.request.form['display_width_size_val'])
     app.det.set_configuration_parameter(
         cluster_num_val, top_k_in_cluster_val, max_ratio_val,
         min_size_pixel_val, min_size_percent_val, compression_val,
         max_compression_size_val, squareness_val, squareness_way_val)
+    app.display.set_display_parameter(display_squareness_val,
+                                      display_width_size_val)
     updated_parameter = app.det.get_configuration_parameter()
+    updated_display_parameter = app.display.get_display_parameter()
     parameter_len = len(origin_parameter)
     parameter_change = False
     for i in range(parameter_len):
         if origin_parameter[i] != updated_parameter[i]:
             parameter_change = True
+            break
+    if not parameter_change:
+        parameter_len = len(origin_display_parameter)
+        for i in range(parameter_len):
+            if origin_display_parameter[i] != updated_display_parameter[i]:
+                parameter_change = True
+                break
 
-    return flask.render_template('configuration_work.html',
-                                 origin_parameter=origin_parameter,
-                                 updated_parameter=updated_parameter,
-                                 parameter_change=parameter_change)
+    return flask.render_template(
+        'configuration_work.html',
+        origin_parameter=origin_parameter,
+        updated_parameter=updated_parameter,
+        origin_display_parameter=origin_display_parameter,
+        updated_display_parameter=updated_display_parameter,
+        parameter_change=parameter_change)
 
 
 @app.route('/classification')
@@ -892,9 +914,12 @@ class ImagenetDetection(object):
         logging.info("Processed {} windows in {:.3f} s.".format(
             len(detections), endtime - starttime))
         if now_index_box > 5:
-            return (True, result, result_all, '%.3f' % (endtime - starttime), True)
+            return (True, result, result_all, '%.3f' %
+                    (endtime - starttime), True)
         else:
-            return (True, result, result_all, '%.3f' % (endtime - starttime), False)
+            return (True, result, result_all, '%.3f' %
+                    (endtime - starttime), False)
+
     def cluster_boxes_of_image(self, imagefilename):
         starttime = time.time()
         boxes = self.bing_search.getBoxesOfOneImage(imagefilename, 130)
@@ -925,6 +950,30 @@ class ImagenetDetection(object):
             return (True, cluster_list, '%.3f' % (endtime - starttime), True)
         else:
             return (True, cluster_list, '%.3f' % (endtime - starttime), False)
+
+
+class Display(object):
+    default_args = dict()
+    default_args["display_squareness"] = False
+    default_args["display_width_size"] = 256
+
+    def __init__(self, display_squareness, display_width_size):
+        logging.info("Loading display parameter")
+        self.display_squareness = display_squareness
+        self.display_width_size = display_width_size
+
+    def get_display_parameter(self):
+        return (self.display_squareness, self.display_width_size)
+
+    def set_display_parameter(self, display_squareness, display_width_size):
+        logging.info(
+            "Squaring image before display change from {:} to {:}".format(
+                self.display_squareness, display_squareness))
+        self.display_squareness = display_squareness
+        logging.info(
+            "The width size of image to display change from {:} to {:}".format(
+                self.display_width_size, display_width_size))
+        self.display_width_size = display_width_size
 
 
 def start_tornado(app, port=5000):
@@ -960,6 +1009,7 @@ def start_from_terminal(app):
     app.clf = ImagenetClassifier(**ImagenetClassifier.default_args)
     # Initialize detection
     app.det = ImagenetDetection(**ImagenetDetection.default_args)
+    app.display = Display(**Display.default_args)
     app.random_detection_list = os.listdir(RANDOM_DETECTION)
     app.random_classification_list = os.listdir(RANDOM_CLASSIFICATION)
     if opts.debug:

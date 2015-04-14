@@ -68,13 +68,16 @@
 		width: 150%;
 	}
 	#min_size_pixel_1{
-		width: 150%
+		width: 150%;
 	}
 	#min_size_percent_1{
-		width: 150%
+		width: 150%;
 	}
 	#max_compression_size_1{
-		width: 150%
+		width: 150%;
+	}
+	#display_width_size_1{
+		width: 150%;
 	}
 	#cluster_number .slider-selection{
 		background: #BABABA;
@@ -93,6 +96,9 @@
 	}
 	#max_compression_size_2 .slider-selection{
 	        background: #BABABA;
+	}
+	#display_width_size_2 .slider-selection{
+		background: #BABABA;	
 	}
 	input{
 		float: center;
@@ -136,10 +142,10 @@
 	    </div>
     </div>
     <div class="container">
-      <div>
-        <h1>Configuration of detection parameters</h1>
-      </div>
       <form role="form" action="configure_parameter" method="post">
+	      <div>
+       		<h1>Configuration of detection parameters</h1>
+	      </div>
 	      <div class="form-group">
 		      <!--<div class="input-group">!-->
 			      <div class="well">
@@ -301,8 +307,31 @@
 			      <input type="hidden" name="min_size_pixel_val" id="min_size_pixel_val" value="{{ origin_parameter[3] }}">
 			      <input type="hidden" name="min_size_percent_val" id="min_size_percent_val" value="{{ origin_parameter[4] }}">
 			      <input type="hidden" name="max_compression_size_val" id="max_compression_size_val" value="{{ origin_parameter[6] }}">
-			      <div id="centerDiv"><input class="btn btn-danger btn-lg" value="Configure Parameters" type="submit" id="configure parameters"></input>
-		      </div>
+	     </div>
+	     <div>
+		     <h1>Configuration of display parameter</h1>
+	     </div>
+	     <div class="form-group">
+		     <div class="well">
+			     <h3>Squaring image before display:
+				     <div class="pull-right">
+					     {% if display_parameter[0] %}
+					     <input id="display_squareness" type="checkbox" data-handle-width="180"  data-off-text="No Squareness" data-on-text="Squareness" name="display_squareness"  data-size="large" checked>	     
+				     	     {% else %}
+					     <input id="display_squareness" type="checkbox" data-handle-width="180"  data-off-text="No Squareness" data-on-text="Squareness" name="display_squareness"  data-size="large">
+					     {% endif %} 
+				     </div>
+		     	     </h3>
+			     <h3>The width size of the image to display
+			     	    <div class="pull-right">
+					    <input type="text" data-slider-min="100" data-slider-max="512" data-slider-step="1"  data-slider-value="{{ display_parameter[1] }}" data-slider-id="display_width_size_2" id="display_width_size_1">
+					    <span id="current_value">Width Size: <span id="displayWidthSize_Val" class="current_num">{{ display_parameter[1] }}</span></span>
+				    </div>
+			     </h3>
+		     </div>
+		     <input type="hidden" name="display_width_size_val" id="display_width_size_val" value= "{{ display_parameter[1] }}">
+	     </div>
+	     <div id="centerDiv"><input class="btn btn-danger btn-lg" value="Configure Parameters" type="submit" id="configure parameters"></input>
 	     </div>
       </form>
      </div>
@@ -385,6 +414,19 @@
         $('#max_compression_size_1').on('change',function () {
 			document.getElementById("max_compression_size_val").value = $(this).context.value;
 			$("#maxCompressionSize_Val").text($(this).context.value);
+			});
+        $('#display_width_size_1').slider({
+			formater: function(value){
+			return 'Current value of width size:' + value;
+				}
+			});
+	$('#display_width_size_1').on('slide',function (slideEvt) {
+			document.getElementById("display_width_size_val").value = slideEvt.value;
+			$("#displayWidthSize_Val").text(slideEvt.value);
+			});
+        $('#display_width_size_1').on('change',function () {
+			document.getElementById("display_width_size_val").value = $(this).context.value;
+			$("#displayWidthSize_Val").text($(this).context.value);
 			});
      </script>
 
