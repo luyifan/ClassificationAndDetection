@@ -97,11 +97,11 @@
       <div class="media">
         <a class="pull-left" href="#" id="origin"></a>
 	<script>
-		var height = 300;
-		var width = 300;
+		var height = {{ imagesrc[1] }};
+		var width = {{ imagesrc[2] }};
 		var svg = d3.select("#origin").append("svg").attr("width",width).attr("height",height);
 		function draw(){
-			svg.append("svg:image").attr("width", width).attr("height",height).attr("xlink:href","{{ imagesrc }} ")
+			svg.append("svg:image").attr("width", width).attr("height",height).attr("xlink:href","{{ imagesrc[0] }} ")
 		}
 		draw();
 	</script>
@@ -154,11 +154,7 @@
           </div>
         </div>
       </div>
-      {% if not result[3] %}
-      </br></br></br></br></br>
-      </br></br></br></br></br>
-      {% endif %}
-
+      <hr style="width:1000px">
       <p class="spendtime"> Total took {{ result[2] }} seconds. </p>
       {% endif %}
       <hr>

@@ -49,6 +49,9 @@
 	p{
 		font-size:20px;
 	}
+	span.tab{
+	    padding: 0 30px; /* Or desired space*/
+	}
     </style>
 
     <!--
@@ -115,21 +118,20 @@
       {% else %}
       <div class="media">
 	<a class="pull-left" id="origin"></a>
-	
     	<script>
-		var height = 300;
-		var width = 300;
+		var height = {{ imagesrc[1] }};
+		var width =  {{ imagesrc[2] }};
 		var svg = d3.select("#origin").append("svg").attr("width",width).attr("height",height);
 		function draw() {
-			svg.append("svg:image").attr("width", width).attr("height",height).attr("xlink:href","{{ imagesrc }} ")
+			svg.append("svg:image").attr("width", width).attr("height",height).attr("xlink:href","{{ imagesrc[0] }} ")
 		}
 		draw(); 
     	</script>
 	<div class="media-body">
           <div class="bs-example bs-example-tabs">
             <ul id="myTab" class="nav nav-tabs">
-              <li class="active"><a href="#infopred" data-toggle="tab">Accurate Result</a></li>
-              <li><a href="#flatpred" data-toggle="tab"> Specific Result</a></li>
+	      <li class="active"><a href="#infopred" data-toggle="tab"><span class="tab"></span>Accurate Result<span class="tab"></span></a></li>
+	      <li><a href="#flatpred" data-toggle="tab"><span class="tab"></span>Specific Result<span class="tab"></span></a></li>
             </ul>
             <div id="myTabContent" class="tab-content">
               <div class="tab-pane fade in active" id="infopred">
@@ -162,6 +164,7 @@
 
         </div>
       </div>
+      <hr style="width:1000px">
       <p> CNN took {{ result[3] }} seconds. </p>
       {% endif %}
       <hr>

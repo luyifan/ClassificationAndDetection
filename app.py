@@ -418,11 +418,17 @@ def classify_local():
 def embed_image_html(image):
     """Creates an image embedded in HTML base64 format."""
     image_pil = PILImage.fromarray((255 * image).astype('uint8'))
-    image_pil = image_pil.resize((256, 256))
+    (width,height)=image_pil.size
+    (display_squareness,display_width_size) = app.display.get_display_parameter()
+    if display_squareness:
+        image_pil = image_pil.resize((display_width_size,display_width_size))
+    else:
+        image_pil = image_pil.resize((display_width_size,int(height*1.0/width*display_width_size)))
+    (width,height)=image_pil.size
     string_buf = StringIO.StringIO()
     image_pil.save(string_buf, format='png')
     data = string_buf.getvalue().encode('base64').replace('\n', '')
-    return 'data:image/png;base64,' + data
+    return ('data:image/png;base64,' + data , height , width ) 
 
 
 def allowed_file(filename):
@@ -913,13 +919,8 @@ class ImagenetDetection(object):
         #print endtime - midtime
         logging.info("Processed {} windows in {:.3f} s.".format(
             len(detections), endtime - starttime))
-        if now_index_box > 5:
-            return (True, result, result_all, '%.3f' %
-                    (endtime - starttime), True)
-        else:
-            return (True, result, result_all, '%.3f' %
-                    (endtime - starttime), False)
-
+        return (True, result, result_all, '%.3f' %
+                    (endtime - starttime))
     def cluster_boxes_of_image(self, imagefilename):
         starttime = time.time()
         boxes = self.bing_search.getBoxesOfOneImage(imagefilename, 130)
@@ -946,16 +947,12 @@ class ImagenetDetection(object):
             cluster_list.append(
                 (index_of_cluster, each_cluster, index_in_cluster))
         endtime = time.time()
-        if self.cluster_num > 5:
-            return (True, cluster_list, '%.3f' % (endtime - starttime), True)
-        else:
-            return (True, cluster_list, '%.3f' % (endtime - starttime), False)
-
+        return (True, cluster_list, '%.3f' % (endtime - starttime))
 
 class Display(object):
     default_args = dict()
     default_args["display_squareness"] = False
-    default_args["display_width_size"] = 256
+    default_args["display_width_size"] = 512
 
     def __init__(self, display_squareness, display_width_size):
         logging.info("Loading display parameter")
