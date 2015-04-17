@@ -26,6 +26,10 @@
 		text-align: right;
 		display: inline-block;
 	}
+	.input-group-addon{
+		font-style:oblique;
+		font-size:16px;
+	}
 	span .current_num{
 		color: green;
 		font-size: large;
@@ -58,6 +62,9 @@
 	p{
 		font-size:20px;
 	}
+	.slider.slider-horizontal{
+		width: 400px;
+	}
 	#cluster_num {
 	      	width: 150%;
 	}
@@ -80,7 +87,7 @@
 		width: 150%;
 	}
 	#cluster_number .slider-selection{
-		background: #BABABA;
+		background:  #BABABA;
 	}
 	#max_ratio_2 .slider-selection{
 		background: #BABABA;
@@ -150,37 +157,93 @@
 		      <!--<div class="input-group">!-->
 			      <div class="well">
 				      <h3>The cluster number of SpectralClustering:
-					      <div class="pull-right"> 
+					      <div class="pull-right">
+
 						      <input type="text" data-slider-min="1" data-slider-max="100" data-slider-step="1"  data-slider-value="{{ origin_parameter[0] }}" data-slider-id="cluster_number" id="cluster_num">
-						      <span id="current_value">Cluster Number: <span id="clusterNumber_Val" class="current_num">{{ origin_parameter[0] }}</span></span>
-					      </div>
+					    </div>
+					       
 				      </h3>
-				      <h3>Top K boxes in  each cluster:
-					      
+				      <div class="row">
+					      <div class="col-md-3 col-md-offset-3"></div>
+					      <div class="col-md-3 col-md-offset-3">
+					      		  <div class="form-group">
+							      <div class="input-group">
+								      <div class="input-group-addon"><strong>Cluster Number:</strong></div>
+								      <input type="text" id="clusterNumber_Val" class="form-control" placeholder="{{ origin_parameter[0] }}">
+								      <!--<div class="input-group-addon">.00</div>!-->
+							      </div>
+						      </div>			      
+					      </div>
+				     </div> 
+				     <h3>Top K boxes in  each cluster:
 					      <div class="pull-right"> 
 						      <input type="text" data-slider-min="1" data-slider-max="100" data-slider-step="1"  data-slider-value="{{ origin_parameter[1] }}" data-slider-id="top_k_2" id="top_k_1">
-
-						      <span id="current_value">Top K Value: <span id="topK_Val" class="current_num">{{ origin_parameter[1] }}</span></span>
 					      </div>
 				      </h3>
+				      <div class="row">
+					      <div class="col-md-3 col-md-offset-3"></div>
+					      <div class="col-md-3 col-md-offset-3">
+					      		  <div class="form-group">
+							      <div class="input-group">
+								      <div class="input-group-addon"><strong>Top K Value:</strong></div>
+								      <input type="text" id="topK_Val" class="form-control" placeholder="{{ origin_parameter[1] }}">
+								      <!--<div class="input-group-addon">.00</div>!-->
+							      </div>
+						      </div>			      
+					      </div>
+				      </div>
 				      <h3>Max ratio of height and width:
 					      <div class="pull-right"> 
 						      <input type="text" data-slider-min="1" data-slider-max="20" data-slider-step="1"  data-slider-value="{{ origin_parameter[2] }}" data-slider-id="max_ratio_2" id="max_ratio_1">
-						      <span id="current_value">Max Ratio Value: <span id="maxRatio_Val" class="current_num">{{ origin_parameter[2] }}</span></span>
 					      </div>
-				      </h3>
+				     </h3>
+				      <div class="row">
+					      <div class="col-md-3 col-md-offset-3"></div>
+					      <div class="col-md-3 col-md-offset-3">
+					      		  <div class="form-group">
+							      <div class="input-group">
+								      <div class="input-group-addon"><strong>Max Ratio Value:</strong></div>
+								      <input type="text" id="maxRatio_Val" class="form-control" placeholder="{{ origin_parameter[2] }}">
+								      <!--<div class="input-group-addon">.00</div>!-->
+							      </div>
+						      </div>			      
+					      </div>
+				     </div>
 				      <h3>Min size of detected box by the square of pixel:
 					      <div class="pull-right">
 						      <input type="text" data-slider-min="1" data-slider-max="100" data-slider-step="1" data-slider-value="{{ origin_parameter[3] }}" data-slider-id="min_size_pixel_2" id="min_size_pixel_1">
-						      <span id="current_value">Min Size Pixel: <span id="minSizePixel_Val" class="current_num">{{ origin_parameter[3] }}^2</span></span>
+					      </div>
+				      </h3>  
+				      <div class="row">
+					      <div class="col-md-3 col-md-offset-3"></div>
+					      <div class="col-md-3 col-md-offset-3">
+					      		  <div class="form-group">
+							      <div class="input-group">
+								      <div class="input-group-addon"><strong>Min Size Pixel:</strong></div>
+								      <input type="text" id="minSizePixel_Val" class="form-control" placeholder="{{ origin_parameter[3] }}">
+								      <div class="input-group-addon"><strong>^2</strong></div>
+							      </div>
+						      </div>			      
+					      </div>
 				      </div>
-				      </h3>
 				      <h3 id="test">Min size of detected box by the percent:
 					      <div class="pull-right">
 						      <input type="text" data-slider-min="1" data-slider-max="100" data-slider-step="1" data-slider-value="{{ origin_parameter[4] }}" data-slider-id="min_size_percent_2" id="min_size_percent_1">
-						      <span id="current_value">Min Size Percent: <span id="minSizePercent_Val" class="current_num">{{ origin_parameter[4] }}%</span></span>
+						</div>
+				  	</h3>
+				        <div class="row">
+					      <div class="col-md-3 col-md-offset-3"></div>
+					      <div class="col-md-3 col-md-offset-3">
+					      		  <div class="form-group">
+							      <div class="input-group">
+								      <div class="input-group-addon"><strong>Min Size Percent:</strong></div>
+								      <input type="text" id="minSizePercent_Val" class="form-control" placeholder="{{ origin_parameter[4] }}">
+								      <div class="input-group-addon"><strong>%</strong></div>
+							      </div>
+						      </div>			      
 					      </div>
-				      </h3>
+				      </div>
+
 				      <h3>Image Compression before detection:
 				      		<div class="pull-right">
 							{% if origin_parameter[5] %}
@@ -188,11 +251,15 @@
 							onchange="
 							var compression = $('#compression').bootstrapSwitch('state');
 							var elem = document.getElementById('compression_size_show') ;
+							var elem2 = document.getElementById('compression_size_show_row');
 							if (compression == true ){
 								elem.style.display='inline';
+								elem2.style.display='inline';
+
 							}
 							else {
 								elem.style.display='none';
+								elem2.style.display='none';
 							}
 							">	
 							{% else %}
@@ -200,30 +267,56 @@
 							onchange="
 							var compression = $('#compression').bootstrapSwitch('state');
 							var elem = document.getElementById('compression_size_show') ;
+							var elem2 = document.getElementById('compression_size_show_row') ;
 							if (compression == true ){
 								elem.style.display='inline';
+								elem2.style.display='inline';
 							}
 							else {
 								elem.style.display='none';
+								elem2.style.display='none';
 							}
 							">	
 							{% endif %}
 						</div>
 				      </h3>
 				      {% if origin_parameter[5] %}
+				      </br>
 				      <h3 id='compression_size_show' style='display:inline'>Max compression size of minimum between height and width:
 					      <div class="pull-right">
 						      <input type="text" data-slider-min="100" data-slider-max="1024" data-slider-step="1" data-slider-value="{{ origin_parameter[6] }}" data-slider-id="max_compression_size_2" id="max_compression_size_1">
-						      <span id="current_value">Max compression size: <span id="maxCompressionSize_Val" class="current_num">{{ origin_parameter[6] }}</span></span>
+						</div>
+					</h3>
+					</br>
+				        <div class="row" id='compression_size_show_row' style='display:inline'>
+					      <div class="col-md-3 col-md-offset-3"></div>
+					      <div class="col-md-3 col-md-offset-3">
+					      		  <div class="form-group">
+							      <div class="input-group">
+								      <div class="input-group-addon"><strong>Max Compression Size:</strong></div>
+								      <input type="text" style="width:60px" id="maxCompressionSize_Val" class="form-control" placeholder="{{ origin_parameter[6] }}">
+							      </div>
+						      </div>			      
 					      </div>
-				      </h3>
+				      </div>
 				      {% else %}
+				      </br>
 				      <h3 id='compression_size_show' style='display:none'>Max compression size of minimum between height and width:
 					      <div class="pull-right">
-						      <input type="text" data-slider-min="100" data-slider-max="1024" data-slider-step="1" data-slider-value="{{ origin_parameter[6] }}" data-slider-id="max_compression_size_2" id="max_compression_size_1">
-						      <span id="current_value">Max compression size: <span id="maxCompressionSize_Val" class="current_num">{{ origin_parameter[6] }}</span></span>
-					      </div>
+						      <input type="text" data-slider-min="100" data-slider-max="1024" data-slider-step="1" data-slider-value="{{ origin_parameter[6] }}" data-slider-id="max_compression_size_2" id="max_compression_size_1">				    </div>
 				      </h3>
+				      </br>
+				      <div class="row" id='compression_size_show_row' style='display:none'>
+					      <div class="col-md-3 col-md-offset-3"></div>
+					      <div class="col-md-3 col-md-offset-3">
+					      		  <div class="form-group">
+							      <div class="input-group">
+								      <div class="input-group-addon"><strong>Max Compression Size:</strong></div>
+								      <input type="text" style="width:60px" id="maxCompressionSize_Val" class="form-control" placeholder="{{ origin_parameter[6] }}">
+							      </div>
+						      </div>			      
+					      </div>
+				      </div>
 				      {% endif %}
 				      <h3>Squaring image before detection:
 				      		<div class="pull-right">
@@ -260,6 +353,7 @@
 							{% endif %}
 						</div>
 				      </h3>
+				      </br>
 				      {% if origin_parameter[7] %}
 				      <h3 id='squareness_way_show'>The Way to square image:
 					      </br></br>
@@ -325,9 +419,19 @@
 			     <h3>The width size of the image to display
 			     	    <div class="pull-right">
 					    <input type="text" data-slider-min="100" data-slider-max="512" data-slider-step="1"  data-slider-value="{{ display_parameter[1] }}" data-slider-id="display_width_size_2" id="display_width_size_1">
-					    <span id="current_value">Width Size: <span id="displayWidthSize_Val" class="current_num">{{ display_parameter[1] }}</span></span>
-				    </div>
+			            </div>
 			     </h3>
+			     <div class="row">
+				     <div class="col-md-3 col-md-offset-3"></div>
+		       		     <div class="col-md-3 col-md-offset-3">
+   					     <div class="form-group">
+						     <div class="input-group">
+							     <div class="input-group-addon"><strong>Width Size:</strong></div>
+							     <input type="text" id="displayWidthSize_Val" class="form-control" placeholder="{{ display_parameter[1] }}">
+						     </div>
+					     </div>			      
+				     </div>
+			     </div>
 		     </div>
 		     <input type="hidden" name="display_width_size_val" id="display_width_size_val" value= "{{ display_parameter[1] }}">
 	     </div>
@@ -343,11 +447,17 @@
 			  });
          $('#cluster_num').on('slide',function (slideEvt) {
 			 document.getElementById("cluster_num_val").value = slideEvt.value;
-			 $("#clusterNumber_Val").text(slideEvt.value);
+			 document.getElementById("clusterNumber_Val").value = slideEvt.value;
 			 });
         $('#cluster_num').on('change',function () {
 			document.getElementById("cluster_num_val").value = $(this).context.value;
-			$("#clusterNumber_Val").text($(this).context.value);
+			document.getElementById("clusterNumber_Val").value = $(this).context.value;
+			});
+	$('#clusterNumber_Val').change(function() {
+			var value = parseInt($(this).context.value);
+			$('#cluster_num').slider('setValue',value);
+			document.getElementById("clusterNumber_Val").value = value;
+			document.getElementById("cluster_num_val").value = value;
 			});
 	$('#top_k_1').slider({
 			formater: function(value) {
@@ -356,11 +466,17 @@
 		});
         $('#top_k_1').on('slide',function (slideEvt) {
 			document.getElementById("top_k_in_cluster_val").value = slideEvt.value;
-			$("#topK_Val").text(slideEvt.value);
+			document.getElementById("topK_Val").value = slideEvt.value;
 			});
         $('#top_k_1').on('change',function () {
 			document.getElementById("top_k_in_cluster_val").value = $(this).context.value;
-			$("#topK_Val").text($(this).context.value);
+			document.getElementById("topK_Val").value = $(this).context.value;
+			});
+	$('#topK_Val').change(function() {
+			var value = parseInt($(this).context.value);
+			$('#top_k_1').slider('setValue',value);
+			document.getElementById("topK_Val").value = value
+			document.getElementById("top_k_in_cluster_val").value = value;
 			});
         $('#max_ratio_1').slider({
 			formater: function(value) {
@@ -369,11 +485,17 @@
 		});
         $('#max_ratio_1').on('slide',function (slideEvt) {
 			document.getElementById("max_ratio_val").value = slideEvt.value;
-			$("#maxRatio_Val").text(slideEvt.value);
+			document.getElementById("maxRatio_Val").value = slideEvt.value;
 			});
         $('#max_ratio_1').on('change',function () {
 			document.getElementById("max_ratio_val").value = $(this).context.value;
-			$("#maxRatio_Val").text($(this).context.value);
+			document.getElementById("maxRatio_Val").value = $(this).context.value;
+			});
+	$('#maxRatio_Val').change(function() {
+			var value = parseInt($(this).context.value);
+			$('#max_ratio_1').slider('setValue',value);
+			document.getElementById("maxRatio_Val").value = value;
+			document.getElementById("max_ratio_val").value = value;
 			});
         $('#min_size_pixel_1').slider({
 			formater: function(value){
@@ -382,11 +504,17 @@
 			});
 	$('#min_size_pixel_1').on('slide',function (slideEvt) {
 			document.getElementById("min_size_pixel_val").value = slideEvt.value;
-			$("#minSizePixel_Val").text(slideEvt.value+"^2");
+			document.getElementById("minSizePixel_Val").value = slideEvt.value;
 			});
         $('#min_size_pixel_1').on('change',function () {
 			document.getElementById("min_size_pixel_val").value = $(this).context.value;
-			$("#minSizePixel_Val").text($(this).context.value+"^2");
+			document.getElementById("minSizePixel_Val").value = $(this).context.value;
+			});
+	$('#minSizePixel_Val').change(function() {
+			var value = parseInt($(this).context.value);
+			$('#min_size_pixel_1').slider('setValue',value);
+			document.getElementById("minSizePixel_Val").value = value;
+			document.getElementById("min_size_pixel_val").value = value;
 			});
         $('#min_size_percent_1').slider({
 			formater: function(value){
@@ -395,13 +523,18 @@
 			});
 	$('#min_size_percent_1').on('slide',function (slideEvt) {
 			document.getElementById("min_size_percent_val").value = slideEvt.value;
-			$("#minSizePercent_Val").text(slideEvt.value+"%");
+			document.getElementById("minSizePercent_Val").value = slideEvt.value;
 			});
         $('#min_size_percent_1').on('change',function () {
 			document.getElementById("min_size_percent_val").value = $(this).context.value;
-			$("#minSizePercent_Val").text($(this).context.value+"%");
+			document.getElementById("minSizePercent_Val").value = $(this).context.value;
 			});
-
+	$('#minSizePercent_Val').change(function() {
+			var value = parseInt($(this).context.value);
+			$('#min_size_percent_1').slider('setValue',value);
+			document.getElementById("minSizePercent_Val").value = value;
+			document.getElementById("min_size_percent_val").value = value;
+			});
         $('#max_compression_size_1').slider({
 			formater: function(value){
 			return 'Current value of max compression size:' + value;
@@ -409,12 +542,19 @@
 			});
 	$('#max_compression_size_1').on('slide',function (slideEvt) {
 			document.getElementById("max_compression_size_val").value = slideEvt.value;
-			$("#maxCompressionSize_Val").text(slideEvt.value);
+			document.getElementById("maxCompressionSize_Val").value = slideEvt.value;
 			});
         $('#max_compression_size_1').on('change',function () {
 			document.getElementById("max_compression_size_val").value = $(this).context.value;
-			$("#maxCompressionSize_Val").text($(this).context.value);
+			document.getElementById("maxCompressionSize_Val").value = $(this).context.value;
 			});
+	$('#maxCompressionSize_Val').change(function() {
+			var value = parseInt($(this).context.value);
+			$('#max_compression_size_1').slider('setValue',value);
+			document.getElementById("maxCompressionSize_Val").value = value;
+			document.getElementById("max_compression_size_val").value = value;
+			});
+
         $('#display_width_size_1').slider({
 			formater: function(value){
 			return 'Current value of width size:' + value;
@@ -422,12 +562,19 @@
 			});
 	$('#display_width_size_1').on('slide',function (slideEvt) {
 			document.getElementById("display_width_size_val").value = slideEvt.value;
-			$("#displayWidthSize_Val").text(slideEvt.value);
+			document.getElementById("displayWidthSize_Val").value = slideEvt.value;
 			});
         $('#display_width_size_1').on('change',function () {
 			document.getElementById("display_width_size_val").value = $(this).context.value;
-			$("#displayWidthSize_Val").text($(this).context.value);
+			document.getElementById("displayWidthSize_Val").value = $(this).context.value;
 			});
+	$('#displayWidthSize_Val').change(function() {
+			var value = parseInt($(this).context.value);
+			$('#display_width_size_1').slider('setValue',value);
+			document.getElementById("displayWidthSize_Val").value = value;
+			document.getElementById("display_width_size_val").value = value;
+			});
+
      </script>
 
    
