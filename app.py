@@ -714,7 +714,7 @@ class ImagenetDetection(object):
                                                    affinity='precomputed')
 
     def removeIOUandOverlap(self, i, index, x1, y1, x2, y2, area, iou,
-                            overlap):
+                            overlap,label):
         xx1 = np.maximum(x1[i], x1[index])
         yy1 = np.maximum(y1[i], y1[index])
         xx2 = np.minimum(x2[i], x2[index])
@@ -724,16 +724,30 @@ class ImagenetDetection(object):
         wh = w * h
         o = wh / (area[i] + area[index] - wh)
         oo = wh / np.minimum(area[i], area[index])
+        index_new = []
+        for one in range(len(index)):
+            if(o[one]<=iou)and(oo[one]<=overlap):
+                index_new.append(index[one])
+            elif (label!=None)and(label[index[one]]!=label[i]):
+                index_new.append(index[one])
+        return index_new
+        '''
         first_match = np.nonzero(o <= iou)[0]
         second_match = np.nonzero(oo <= overlap)[0]
-        index = index[np.intersect1d(second_match, first_match)]
-        return index
+        index_new = index[np.intersect1d(second_match, first_match)]
+        if label != None:
+            index_diff = np.setdiff1d ( index , index_new ) 
+            print index_diff [ np.nonzero ( (label[index_diff] != label [i]) )[0] ]
+        
+        return index_new
+        '''
 
     def nms_detections(self, dets, iou=0.1, overlap=0.8):
         x1 = dets[:, 3]
         y1 = dets[:, 2]
         x2 = dets[:, 5]
         y2 = dets[:, 4]
+        label = dets [:,1]
         ind = np.argsort(dets[:, 0])
         dets_len = len(ind)
         threshold = -0.2
@@ -769,15 +783,15 @@ class ImagenetDetection(object):
             pick.append(i)
             ind_two = ind_two[:-1]
             ind_two = self.removeIOUandOverlap(i, ind_two, x1, y1, x2, y2,
-                                               area, iou * 3, overlap)
+                                               area, iou * 3, overlap, label)
             ind_one = self.removeIOUandOverlap(i, ind_one, x1, y1, x2, y2,
-                                               area, iou, overlap)
+                                               area, iou, overlap , None )
         while len(ind_one) > 0:
             i = ind_one[-1]
             pick.append(i)
             ind_one = ind_one[:-1]
             ind_one = self.removeIOUandOverlap(i, ind_one, x1, y1, x2, y2,
-                                               area, iou, overlap)
+                                               area, iou, overlap , None )
         return dets[pick,:]
 
     def get_box_of_each_cluster_boxes(self, boxes):
