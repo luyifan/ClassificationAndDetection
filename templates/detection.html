@@ -31,7 +31,10 @@
 	div#hidden{
 		display:none;
 	}
-
+	svg#copy{
+		position:fixed;
+		right:0px;
+	}
 	#image-upload > input
 	{
 		    display: none;
@@ -116,12 +119,17 @@
       {% else %}
       <div class="media">
         <a class="pull-left" href="#" id="origin"></a>
+	
 	<script>
 		var height = {{ imagesrc[1] }};
 		var width = {{ imagesrc[2] }};
-		var svg = d3.select("#origin").append("svg").attr("width",width).attr("height",height);
+		var width_copy = 380;
+		var height_copy = height * width_copy / width ; 
+		var svg = d3.select("#origin").append("svg").attr("width",width).attr("height",height).attr("id","org");
+		var svg_copy = d3.select("#origin").append("svg").attr("width",width_copy).attr("height",height_copy).attr("id","copy");
 		function draw(){
 			svg.append("svg:image").attr("width", width).attr("height",height).attr("xlink:href","{{ imagesrc[0] }} ")
+			svg_copy.append("svg:image").attr("width", width_copy).attr("height",height_copy).attr("xlink:href","{{ imagesrc[0] }} ")
 		}
 		draw();
 	</script>
@@ -138,7 +146,7 @@
                   <li class="list-group-item">
                   <span class="badge">{{ single_pred[1] }}</span>
                   <h3 class="list-group-item-heading">
-			  <a href="https://www.google.com/#q={{ single_pred[0] }}" id="prediction_{{ single_pred[2] }}" target="_blank">{{ single_pred[0] }}</a>
+			  <a href="https://www.baidu.com/s?wd={{ single_pred[0] }}" id="prediction_{{ single_pred[2] }}" target="_blank">{{ single_pred[0] }}</a>
                   </h3>
 		  <script>
 			function drawBox(){
@@ -146,14 +154,20 @@
 				var ylen = height * {{ single_pred[4] }};
 				var xmin = width * {{ single_pred[5] }};
 				var xlen = width * {{ single_pred[6] }};
+				var ymin_copy = height_copy * {{ single_pred[3] }};
+				var ylen_copy = height_copy * {{ single_pred[4] }};
+				var xmin_copy = width_copy * {{ single_pred[5] }};
+				var xlen_copy = width_copy * {{ single_pred[6] }};
 				svg.append("svg:rect").attr("id", "box_{{ single_pred[2] }}").attr("x",xmin).attr("y",ymin).attr("width",xlen).attr("height", ylen).style("fill-opacity", 0.2).style("fill","red").style("stroke-width", "5px").style("stroke", "red").style('visibility', 'hidden');
+				svg_copy.append("svg:rect").attr("id", "copy_box_{{ single_pred[2] }}").attr("x",xmin_copy).attr("y",ymin_copy).attr("width",xlen_copy).attr("height", ylen_copy).style("fill-opacity", 0.2).style("fill","red").style("stroke-width", "5px").style("stroke", "red").style('visibility', 'hidden');
 				var a = d3.select("#prediction_{{ single_pred[2]}}");
 				a.on("mouseover",function(){
 					d3.select("#box_{{ single_pred[2] }}").style('visibility', 'visible');		
+					d3.select("#copy_box_{{ single_pred[2] }}").style('visibility', 'visible');		
 				}).on("mouseout",function(){
 					d3.select("#box_{{ single_pred[2] }}").style('visibility', 'hidden');
+					d3.select("#copy_box_{{ single_pred[2] }}").style('visibility', 'hidden');
 				});
-
 
 			}
 			drawBox();
@@ -168,7 +182,7 @@
                   <li class="list-group-item">
                   <span class="badge">{{ single_pred[1] }}</span>
                   <h3 class="list-group-item-heading">
-			  <a href="https://www.google.com/#q={{ single_pred[0] }}" id="prediction_{{ single_pred[2] }}" target="_blank">{{ single_pred[0] }}</a>
+			  <a href="https://www.baidu.com/s?wd=={{ single_pred[0] }}" id="prediction_{{ single_pred[2] }}" target="_blank">{{ single_pred[0] }}</a>
                   </h3>
 		  <script>
 			function drawBox(){
@@ -176,13 +190,19 @@
 				var ylen = height * {{ single_pred[4] }};
 				var xmin = width * {{ single_pred[5] }};
 				var xlen = width * {{ single_pred[6] }};
+				var ymin_copy = height_copy * {{ single_pred[3] }};
+				var ylen_copy = height_copy * {{ single_pred[4] }};
+				var xmin_copy = width_copy * {{ single_pred[5] }};
+				var xlen_copy = width_copy * {{ single_pred[6] }};
 				svg.append("svg:rect").attr("id", "box_{{ single_pred[2] }}").attr("x",xmin).attr("y",ymin).attr("width",xlen).attr("height", ylen).style("fill-opacity", 0.2).style("fill","red").style("stroke-width", "5px").style("stroke", "red").style('visibility', 'hidden');
+				svg_copy.append("svg:rect").attr("id", "copy_box_{{ single_pred[2] }}").attr("x",xmin_copy).attr("y",ymin_copy).attr("width",xlen_copy).attr("height", ylen_copy).style("fill-opacity", 0.2).style("fill","red").style("stroke-width", "5px").style("stroke", "red").style('visibility', 'hidden');
 				var a = d3.select("#prediction_{{ single_pred[2]}}");
 				a.on("mouseover",function(){
 					d3.select("#box_{{ single_pred[2] }}").style('visibility', 'visible');		
+					d3.select("#copy_box_{{ single_pred[2] }}").style('visibility', 'visible');		
 				}).on("mouseout",function(){
 					d3.select("#box_{{ single_pred[2] }}").style('visibility', 'hidden');
-	      
+					d3.select("#copy_box_{{ single_pred[2] }}").style('visibility', 'hidden');
 				});
 			}
 			drawBox();

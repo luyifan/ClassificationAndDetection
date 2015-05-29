@@ -31,7 +31,10 @@
 	div#hidden{
 		display:none;
 	}
-
+	svg#copy{
+		position:fixed;
+		right:0px;
+	}
 	#image-upload > input
 	{
 		    display: none;
@@ -99,9 +102,13 @@
 	<script>
 		var height = {{ imagesrc[1] }};
 		var width = {{ imagesrc[2] }};
+		var width_copy = 380;
+		var height_copy = height * width_copy / width ; 
 		var svg = d3.select("#origin").append("svg").attr("width",width).attr("height",height);
+		var svg_copy = d3.select("#origin").append("svg").attr("width",width_copy).attr("height",height_copy).attr("id","copy");
 		function draw(){
 			svg.append("svg:image").attr("width", width).attr("height",height).attr("xlink:href","{{ imagesrc[0] }} ")
+			svg_copy.append("svg:image").attr("width", width_copy).attr("height",height_copy).attr("xlink:href","{{ imagesrc[0] }} ")
 		}
 		draw();
 	</script>
@@ -126,7 +133,12 @@
 				var ylen = height * {{ one_box[2] }};
 				var xmin = width *  {{ one_box[3] }};
 				var xlen = width *  {{ one_box[4] }};
+				var ymin_copy = height_copy * {{ one_box[1] }}; 
+				var ylen_copy = height_copy * {{ one_box[2] }};
+				var xmin_copy = width_copy * {{ one_box[3] }};
+			        var xlen_copy = width_copy * {{ one_box[4] }};	
 				svg.append("svg:rect").attr("id","box_{{ one_box[0] }}").attr("x",xmin).attr("y",ymin).attr("width",xlen).attr("height",ylen).style("stroke-width","3px").style("fill-opacity",0).style("stroke",d3.rgb({{ one_box[5] }},{{ one_box[6] }},{{ one_box[7] }})).style('visibility','hidden');
+				svg_copy.append("svg:rect").attr("id","copy_box_{{ one_box[0] }}").attr("x",xmin_copy).attr("y",ymin_copy).attr("width",xlen_copy).attr("height",ylen_copy).style("stroke-width","3px").style("fill-opacity",0).style("stroke",d3.rgb({{ one_box[5] }},{{ one_box[6] }},{{ one_box[7] }})).style('visibility','hidden');
 			}
 			drawBox();
 		  </script>
@@ -138,11 +150,13 @@
 				for(i=0;i<one_cluster_{{ each_cluster[0] }}.length;i++){
 					//console.log("#box_".concat(one_cluster_{{ each_cluster[0] }}[i]));
 					d3.select("#box_".concat(one_cluster_{{ each_cluster[0] }}[i])).style('visibility', 'visible');
+					d3.select("#copy_box_".concat(one_cluster_{{ each_cluster[0] }}[i])).style('visibility', 'visible');
 				}
 			}).on("mouseout",function(){
 				for(i=0;i<one_cluster_{{ each_cluster[0] }}.length;i++){
 					//console.log("#box_".concat(one_cluster_{{ each_cluster[0] }}[i]));
 					d3.select("#box_".concat(one_cluster_{{ each_cluster[0] }}[i])).style('visibility', 'hidden');
+					d3.select("#copy_box_".concat(one_cluster_{{ each_cluster[0] }}[i])).style('visibility', 'hidden');
 				}
 			});
 		  </script>
