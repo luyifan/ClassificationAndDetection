@@ -87,28 +87,6 @@
     </div>
 
     <div class="container">
-      <div>
-        <h1>Cluster boxes of an image</h1>
-        <a href="/cluster_random">Click to choose one random example</a>
-      </div>
-      <form role="form" action="cluster_url" method="get">
-        <div class="form-group">
-          <div class="input-group">
-            <input type="text" class="form-control" name="imageurl" id="imageurl" placeholder="Provide an image URL">
-            <span class="input-group-btn">
-            <input class="btn btn-danger" value="Cluster Boxes from URL" type="submit" id="clusterurl"></input>
-            </span>
-          </div><!-- /input-group -->
-        </div>
-      </form>
-      <form id="formupload" class="form-inline" role="form" action="cluster_upload" method="post" enctype="multipart/form-data">
-        <div class="form-group" id="image-upload">
-		<label for="imagefile">Or upload an image:</br><img src="/static/img/upload.png" /></label>
-		<input type="file" name="imagefile" id="imagefile">
-        </div>
-	<!--<input type="submit" class="btn btn-primary" value="Classify File" id="classifyfile"></input>-->
-      </form>
-      <hr>
       {% if has_result %}
       <div> 
       	<h1>The result of box clustering</h1>
@@ -122,14 +100,26 @@
 	<script>
 		var height = {{ imagesrc[1] }};
 		var width = {{ imagesrc[2] }};
-		var width_copy = 380;
-		var height_copy = height * width_copy / width ; 
-		var svg = d3.select("#origin").append("svg").attr("width",width).attr("height",height);
-		var svg_copy = d3.select("#origin").append("svg").attr("width",width_copy).attr("height",height_copy).attr("id","copy");
+		var width_copy = width;
+		var height_copy = height ; 
+		var svg = d3.select("#origin").append("svg").attr("width",width).attr("height",height).attr("id","org");
 		function draw(){
-			svg.append("svg:image").attr("width", width).attr("height",height).attr("xlink:href","{{ imagesrc[0] }} ")
-			svg_copy.append("svg:image").attr("width", width_copy).attr("height",height_copy).attr("xlink:href","{{ imagesrc[0] }} ")
+			svg.append("svg:image").attr("id","org_image").attr("width", width).attr("height",height).attr("xlink:href","{{ imagesrc[0] }} ");
+			svg_copy.append("svg:image").attr("id","copy_image").attr("width", width_copy).attr("height",height_copy).attr("xlink:href","{{ imagesrc[0] }} ").style('visibility', 'hidden');
 		}
+		function getPosition (element) {
+			var xPosition = 0 ;
+			var yPosition = 0 ;
+			while (element){
+				xPosition += (element.offsetLeft - element.scrollLeft + element.clientLeft);
+			        yPosition += (element.offsetTop - element.scrollTop + element.clientTop);
+			        element = element.offsetParent;	 
+			}
+			return { x: xPosition, y: yPosition - 300 };
+		}
+		var myElement = document.getElementById("org");
+		var position = getPosition(myElement);
+		var svg_copy = d3.select("#origin").append("svg").attr("width",width_copy).attr("height",height_copy).attr("id","copy").attr("style","left:"+position.x+"px;top:"+position.y+"px;z-index:100;");
 		draw();
 	</script>
 	<div class="media-body">
@@ -157,7 +147,7 @@
 				var ylen_copy = height_copy * {{ one_box[2] }};
 				var xmin_copy = width_copy * {{ one_box[3] }};
 			        var xlen_copy = width_copy * {{ one_box[4] }};	
-				svg.append("svg:rect").attr("id","box_{{ one_box[0] }}").attr("x",xmin).attr("y",ymin).attr("width",xlen).attr("height",ylen).style("stroke-width","3px").style("fill-opacity",0).style("stroke",d3.rgb({{ one_box[5] }},{{ one_box[6] }},{{ one_box[7] }})).style('visibility','hidden');
+				//svg.append("svg:rect").attr("id","box_{{ one_box[0] }}").attr("x",xmin).attr("y",ymin).attr("width",xlen).attr("height",ylen).style("stroke-width","3px").style("fill-opacity",0).style("stroke",d3.rgb({{ one_box[5] }},{{ one_box[6] }},{{ one_box[7] }})).style('visibility','hidden');
 				svg_copy.append("svg:rect").attr("id","copy_box_{{ one_box[0] }}").attr("x",xmin_copy).attr("y",ymin_copy).attr("width",xlen_copy).attr("height",ylen_copy).style("stroke-width","3px").style("fill-opacity",0).style("stroke",d3.rgb({{ one_box[5] }},{{ one_box[6] }},{{ one_box[7] }})).style('visibility','hidden');
 			}
 			drawBox();
@@ -167,12 +157,16 @@
 			var one_cluster_{{ each_cluster[0] }} = {{ each_cluster[2] }};
 			var a_{{ each_cluster[0] }}= d3.select("#cluster_box_{{each_cluster[0]}}");
 			a_{{ each_cluster[0] }}.on("mouseover",function(){
+				d3.select("#copy_image").style('visibility','visible');
+				d3.select("#org_image").style('visibility','hidden');
 				for(i=0;i<one_cluster_{{ each_cluster[0] }}.length;i++){
 					//console.log("#box_".concat(one_cluster_{{ each_cluster[0] }}[i]));
-					d3.select("#box_".concat(one_cluster_{{ each_cluster[0] }}[i])).style('visibility', 'visible');
+					//d3.select("#box_".concat(one_cluster_{{ each_cluster[0] }}[i])).style('visibility', 'visible');
 					d3.select("#copy_box_".concat(one_cluster_{{ each_cluster[0] }}[i])).style('visibility', 'visible');
 				}
 			}).on("mouseout",function(){
+				d3.select("#copy_image").style('visibility','hidden');
+				d3.select("#org_image").style('visibility','visible');
 				for(i=0;i<one_cluster_{{ each_cluster[0] }}.length;i++){
 					//console.log("#box_".concat(one_cluster_{{ each_cluster[0] }}[i]));
 					d3.select("#box_".concat(one_cluster_{{ each_cluster[0] }}[i])).style('visibility', 'hidden');
@@ -191,8 +185,30 @@
       <hr style="width:1000px">
       <p class="spendtime"> Total took {{ result[2] }} seconds. </p>
       {% endif %}
+      <hr>
       {% endif %}
 
+      <div>
+        <h1>Cluster boxes of an image</h1>
+        <a href="/cluster_random">Click to choose one random example</a>
+      </div>
+      <form role="form" action="cluster_url" method="get">
+        <div class="form-group">
+          <div class="input-group">
+            <input type="text" class="form-control" name="imageurl" id="imageurl" placeholder="Provide an image URL">
+            <span class="input-group-btn">
+            <input class="btn btn-danger" value="Cluster Boxes from URL" type="submit" id="clusterurl"></input>
+            </span>
+          </div><!-- /input-group -->
+        </div>
+      </form>
+      <form id="formupload" class="form-inline" role="form" action="cluster_upload" method="post" enctype="multipart/form-data">
+        <div class="form-group" id="image-upload">
+		<label for="imagefile">Or upload an image:</br><img src="/static/img/upload.png" /></label>
+		<input type="file" name="imagefile" id="imagefile">
+        </div>
+	<!--<input type="submit" class="btn btn-primary" value="Classify File" id="classifyfile"></input>-->
+      </form>
     </div>
    </div>
    
