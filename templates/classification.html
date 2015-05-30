@@ -110,8 +110,29 @@
         <h1>Classify an image</h1>
         <a href="/classify_random">Click to choose one random example</a>
       </div>
+      <form role="form" action="classify_url" method="get">
+        <div class="form-group">
+          <div class="input-group">
+            <input type="text" class="form-control" name="imageurl" id="imageurl" placeholder="Provide an image URL">
+            <span class="input-group-btn">
+              <input class="btn btn-danger" value="Classify URL" type="submit" id="classifyurl"></input>
+            </span>
+          </div><!-- /input-group -->
+        </div>
+      </form>
 
+      <form id="formupload" class="form-inline" role="form" action="classify_upload" method="post" enctype="multipart/form-data">
+        <div class="form-group" id="image-upload">
+		<label for="imagefile">Or upload an image:</br><img src="/static/img/upload.png" /></label>
+		<input type="file" name="imagefile" id="imagefile">
+        </div>
+        <!--<input type="submit" class="btn btn-primary" value="Classify File" id="classifyfile"></input>-->
+      </form>
+      <hr>
       {% if has_result %}
+      <div>
+      	<h1>The result of classification</h1>
+      </div>
       {% if not result[0] %}
       <!-- we have error in the result. -->
       <div class="alert alert-danger">{{ result[1] }} Did you provide a valid URL or a valid image file? </div>
@@ -167,27 +188,8 @@
       <hr style="width:1000px">
       <p> CNN took {{ result[3] }} seconds. </p>
       {% endif %}
-      <hr>
       {% endif %}
 
-      <form role="form" action="classify_url" method="get">
-        <div class="form-group">
-          <div class="input-group">
-            <input type="text" class="form-control" name="imageurl" id="imageurl" placeholder="Provide an image URL">
-            <span class="input-group-btn">
-              <input class="btn btn-danger" value="Classify URL" type="submit" id="classifyurl"></input>
-            </span>
-          </div><!-- /input-group -->
-        </div>
-      </form>
-
-      <form id="formupload" class="form-inline" role="form" action="classify_upload" method="post" enctype="multipart/form-data">
-        <div class="form-group" id="image-upload">
-		<label for="imagefile">Or upload an image:</br><img src="/static/img/upload.png" /></label>
-		<input type="file" name="imagefile" id="imagefile">
-        </div>
-        <!--<input type="submit" class="btn btn-primary" value="Classify File" id="classifyfile"></input>-->
-      </form>
     </div>
    </div>
    

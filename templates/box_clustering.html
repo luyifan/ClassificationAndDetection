@@ -91,8 +91,28 @@
         <h1>Cluster boxes of an image</h1>
         <a href="/cluster_random">Click to choose one random example</a>
       </div>
-
+      <form role="form" action="cluster_url" method="get">
+        <div class="form-group">
+          <div class="input-group">
+            <input type="text" class="form-control" name="imageurl" id="imageurl" placeholder="Provide an image URL">
+            <span class="input-group-btn">
+            <input class="btn btn-danger" value="Cluster Boxes from URL" type="submit" id="clusterurl"></input>
+            </span>
+          </div><!-- /input-group -->
+        </div>
+      </form>
+      <form id="formupload" class="form-inline" role="form" action="cluster_upload" method="post" enctype="multipart/form-data">
+        <div class="form-group" id="image-upload">
+		<label for="imagefile">Or upload an image:</br><img src="/static/img/upload.png" /></label>
+		<input type="file" name="imagefile" id="imagefile">
+        </div>
+	<!--<input type="submit" class="btn btn-primary" value="Classify File" id="classifyfile"></input>-->
+      </form>
+      <hr>
       {% if has_result %}
+      <div> 
+      	<h1>The result of box clustering</h1>
+      </div>
       {% if not result[0] %}
       <!-- we have error in the result. -->
       <div class="alert alert-danger">{{ result[1] }} Did you provide a valid URL or a valid image file? </div>
@@ -171,27 +191,8 @@
       <hr style="width:1000px">
       <p class="spendtime"> Total took {{ result[2] }} seconds. </p>
       {% endif %}
-      <hr>
       {% endif %}
 
-      <form role="form" action="cluster_url" method="get">
-        <div class="form-group">
-          <div class="input-group">
-            <input type="text" class="form-control" name="imageurl" id="imageurl" placeholder="Provide an image URL">
-            <span class="input-group-btn">
-            <input class="btn btn-danger" value="Cluster Boxes from URL" type="submit" id="clusterurl"></input>
-            </span>
-          </div><!-- /input-group -->
-        </div>
-      </form>
-      <form id="formupload" class="form-inline" role="form" action="cluster_upload" method="post" enctype="multipart/form-data">
-        
-        <div class="form-group" id="image-upload">
-		<label for="imagefile">Or upload an image:</br><img src="/static/img/upload.png" /></label>
-		<input type="file" name="imagefile" id="imagefile">
-        </div>
-	<!--<input type="submit" class="btn btn-primary" value="Classify File" id="classifyfile"></input>-->
-      </form>
     </div>
    </div>
    
